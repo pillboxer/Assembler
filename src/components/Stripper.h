@@ -1,0 +1,1 @@
+void strip(char* string);
