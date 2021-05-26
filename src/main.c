@@ -1,31 +1,31 @@
-#include "../libs/CuTest.h"
-#include "tests/StripperTests.h"
-#include "components/Stripper.h"
 #include "error/Error.h"
 #include <stdio.h>
 
-void run_all_tests() {
-	CuString *output = CuStringNew();
-	CuSuite* suite = CuSuiteNew();
-	CuSuiteAddSuite(suite, StripperGetSuite());
-	CuSuiteRun(suite);
-	CuSuiteSummary(suite, output);
-	CuSuiteDetails(suite, output);
-	fflush(stdout);
-	// printf("%s\n", output->buffer);
-}
+void assemble(const char *file);
 
 int main(int argc, char** argv) {
 	
 	switch (argc) 
 	{
 		case 2:
-			printf("Test: %s", argv[1]);
+			assemble(argv[1]);
 			break;
 		default:
 			exit_with_error(INCORRECT_ARGUMENT_COUNT);		
 	}
-		
-	run_all_tests();
 	return 0;
+}
+
+void assemble(const char *file_name) {
+	printf("Starting assembly of file %s\n", file_name);
+	FILE *file = fopen(file_name, "r");
+
+	if (file == NULL) {
+		exit_with_error(FILE_NOT_FOUND);
+	}
+
+	else {
+		printf("File found!\n");
+	}
+
 }

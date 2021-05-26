@@ -22,10 +22,10 @@ void error_string_for_code(int code, char **str) {
 	switch (code) 
 	{
 		case INCORRECT_ARGUMENT_COUNT:
-			*str = "Incorrect argument count.";
+			*str = "Incorrect argument count";
 			break;
-		case FILE_NOT_EXISTS:
-			*str = "The file doesn't exist.";
+		case FILE_NOT_FOUND:
+			*str = "The file doesn't exist";
 			break;
 		default:
 			*str = "Unknown error.";
