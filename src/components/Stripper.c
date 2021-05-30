@@ -1,5 +1,5 @@
 #include<stdio.h>
 
-void strip(char* string) {
-	printf("Attempting to strip %s", string);
+void strip(char** ptr) {
+	printf("Attempting to strip %s", *ptr);
 }
