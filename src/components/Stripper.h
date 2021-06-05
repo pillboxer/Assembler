@@ -1,1 +1,1 @@
-void strip(char* string);
+void strip(char** string);

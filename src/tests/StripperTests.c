@@ -2,7 +2,7 @@
 #include "../../src/components/Stripper.h"
 #include <stdio.h>
 
-	void TestStringWithNewlinesReturnsStringWithoutNewLines(CuTest *tc);
+void TestStringWithNewlinesReturnsStringWithoutNewLines(CuTest *tc);
 
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
@@ -13,12 +13,11 @@
 	void TestStringWithNewlinesReturnsStringWithoutNewLines(CuTest *tc) {
 		char* input = "This is a string\n\nAndSoIsThis";
 		char* expected = "This is a string\nAndSoIsThis";
-		strip(input);
+		strip(&input);		
 		CuAssertStrEquals(tc, expected, input);
 	}
 
 	int main() {
-		printf("Starting");
 		CuSuite* suite = CuSuiteNew();
 		CuSuite* strip_suite = StripperGetSuite();
 		CuSuiteAddSuite(suite, strip_suite);
@@ -27,7 +26,7 @@
 
 		// Getting seg fault here
 		CuSuiteRun(suite);
-//		CuSuiteSummary(suite, output);
-//		CuSuiteDetails(suite, output);
-//		printf("%s\n", output->buffer);
+		CuSuiteSummary(suite, output);
+		CuSuiteDetails(suite, output);
+		printf("%s\n", output->buffer);
 	}
