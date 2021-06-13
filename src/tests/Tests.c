@@ -8,7 +8,8 @@
 #include "../../src/components/Stripper.h"
 
 void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
-void TestInstructionsHaveExpectedCommandTypes(CuTest *tc);
+void TestInstructionsHaveExpectedNumberOfCommands(CuTest *tc);
+void TestInstructionsHaveCorrectTypeOfCommands(CuTest *tc);
 
 	// Suites
 	CuSuite* StripperGetSuite() {
@@ -19,7 +20,8 @@ void TestInstructionsHaveExpectedCommandTypes(CuTest *tc);
 
 	CuSuite* ParserGetSuite() {
 		CuSuite* suite = CuSuiteNew();
-		SUITE_ADD_TEST(suite, TestInstructionsHaveExpectedCommandTypes);
+		SUITE_ADD_TEST(suite, TestInstructionsHaveExpectedNumberOfCommands);
+		SUITE_ADD_TEST(suite, TestInstructionsHaveCorrectTypeOfCommands);
 		return suite;
 	}
 
@@ -36,14 +38,16 @@ void TestInstructionsHaveExpectedCommandTypes(CuTest *tc);
 	}
 
 	// Parser Functions
-	void TestInstructionsHaveExpectedCommandTypes(CuTest *tc) {
-		command_type_t *res = malloc(sizeof(command_type_t) * 6);
-		commands(&res, ADD_ASM_STRIPPED);
-		
-		for (int i = 0; i < 6; i++) {
-			printf("testing %d against %d\n", res[i], ADD_ASM_CMDS[i]);
-		}
-		CuAssert(tc, "All Commands Match", true);
+	void TestInstructionsHaveExpectedNumberOfCommands(CuTest *tc) {
+		int expected = 6;
+		int actual = num_commands(ADD_ASM_STRIPPED);
+		CuAssertIntEquals(tc, expected, actual);
+	}
+
+	void TestInstructionsHaveCorrectTypeOfCommands(CuTest *tc) {
+		command_type_t expected = COMP;
+		command_type_t actual = command_type("AMD=FIX");
+		CuAssertIntEquals(tc, actual, expected);
 	}
 
 	// Main
