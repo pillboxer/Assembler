@@ -4,14 +4,19 @@
 #include <stdlib.h>
 #include "Parser.h"
 
+#define VALID_DESTINATION_COUNT 7
+#define VALID_COMPUTATION_COUNT 28
+
 static bool is_a_command(const char* str);
 static bool is_c_command(const char* str);
 
-const char* valid_destinations[7] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
+bool is_valid_destination(const char *str);
+const char* valid_destinations[VALID_DESTINATION_COUNT] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
+const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", "-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", "A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", "M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
 
 int num_commands(const char* str) {
 	
-	int count = 0;
+int count = 0;
 	int current_size = 1;
 	int current_command_pos = 0;
 	char *current_command = malloc(sizeof(char) * current_size);
@@ -75,18 +80,31 @@ static bool is_c_command(const char* str) {
 			assignment_operator_position = i;
 		}
 	}
-
 	if (assignment_operator_position != 0) {
+		// We have some destination
 		printf("pos is %d\n", assignment_operator_position);
-		int dest_str_count = assignment_operator_position;
-		char *destination = malloc(sizeof(char) * dest_str_count + 1);
-		strncpy(destination, str, dest_str_count);
-		destination[dest_str_count] = '\0';
-		printf("Destination is %s\n", destination);
+		// Create a string with the length of the string up to the '=', add 1 for null terminator 
+		char *destination = malloc(sizeof(char) * assignment_operator_position + 1);
+		strncpy(destination, str, assignment_operator_position);
+		destination[assignment_operator_position] = '\0';
+		if (!is_valid_destination(destination)) {
+			printf("Invalid destination %s\n", destination);
+			return false;
+		}
+		
 	}
 
 	return false;
 
+}
+
+bool is_valid_destination(const char* str) {
+	for (int i = 0; i < VALID_DESTINATION_COUNT; i++) {
+		if (str == valid_destinations[i]) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
