@@ -12,7 +12,10 @@ static bool is_c_command(const char* str);
 
 bool is_valid_destination(const char *str);
 const char* valid_destinations[VALID_DESTINATION_COUNT] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
-const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", "-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", "A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", "M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
+const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", 
+															"-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", 
+															"A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", 
+															"M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
 
 int num_commands(const char* str) {
 	
@@ -72,27 +75,45 @@ static bool is_a_command(const char* str) {
 
 static bool is_c_command(const char* str) {
 	
+
+	// Given "AD=D+1;JGT", assignment_operator_position = 2
 	int assignment_operator_position = 0;
+	// Given "AD=D+1;JGT", computation_operation_position = 3
+	int computation_operation_position = 0;
+	// Given "AD=D+1;JGT", jump_operation_position = 7
+	int jump_operation_position = 0;
 
 	// Check if there is a destination
 	for (int i = 0; i < strlen(str); i++) {
 		if (str[i] == '=') {
 			assignment_operator_position = i;
+			computation_operation_position = i+1;
+		}
+		if (str[i] == ';') {
+			jump_operation_position = i+1;
 		}
 	}
+
 	if (assignment_operator_position != 0) {
+
 		// We have some destination
-		printf("pos is %d\n", assignment_operator_position);
+		printf("Parser.c -> assignment operation is at position %d\n", assignment_operator_position);
+
 		// Create a string with the length of the string up to the '=', add 1 for null terminator 
 		char *destination = malloc(sizeof(char) * assignment_operator_position + 1);
 		strncpy(destination, str, assignment_operator_position);
 		destination[assignment_operator_position] = '\0';
+
+		// Check if the destination is valid
 		if (!is_valid_destination(destination)) {
-			printf("Invalid destination %s\n", destination);
+			printf("Parser.c -> Invalid destination %s\n", destination);
 			return false;
 		}
-		
 	}
+
+	// There will always be a computation
+	// Go to ';' or '\0' - that's where the computation ends
+	// Send to is_valid_computation
 
 	return false;
 
