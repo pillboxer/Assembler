@@ -18,7 +18,7 @@ static void strip_whitespace(char **ptr) {
 	int current_pos = 0;
 
 	for (int i = 0; i < strlen(*ptr); i++) {
-		if ((*ptr)[i] == '\n' && ((*ptr)[i-1] == '\n' || (*ptr)[i+1] == '\0')) {
+		if (((*ptr)[i] == ' ') || ((*ptr)[i] == '\n' && ((*ptr)[i-1] == '\n' || (*ptr)[i+1] == '\0'))) {
 			continue;
 		}
 		res[current_pos] = (*ptr)[i];
@@ -29,19 +29,21 @@ static void strip_whitespace(char **ptr) {
 }
 
 static void strip_comments(char **ptr) {
-
 	char *res = malloc(sizeof(*ptr));
 	int current_pos = 0;
 	bool copy_allowed = true; 	
+	bool is_purely_comment = false;
 
 	for (int i = 0; i < strlen(*ptr); i++) {
 
 		if ((*ptr)[i] == '\n' && !copy_allowed) { 
 			copy_allowed = true;
-			continue;
+			if (is_purely_comment)
+				continue;
 		}
 
 		if ((*ptr)[i] == '/' && (*ptr)[i+1] == '/') {
+			is_purely_comment = (*ptr)[i-1] == '\n' || i == 0;
 			copy_allowed = false;
 			continue;
 		}

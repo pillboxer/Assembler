@@ -6,6 +6,3 @@ typedef enum command_type {
 } command_type_t;
 
 int num_commands(const char *str);
-void commands(command_type_t **ptr, const char *str);
-command_type_t command_type(const char* str);
-bool is_valid_destination(const char *str);
