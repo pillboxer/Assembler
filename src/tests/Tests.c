@@ -10,6 +10,7 @@ void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
 void TestFileWithoutLabelsHasExpectedNumberOfCommands(CuTest *tc);
 void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
+void TestFileWithLabelsHasExpectedNumberOfCommands(CuTest *tc);
 
 	// ## SUITES ##
 
@@ -23,6 +24,7 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 	CuSuite* ParserGetSuite() {
 		CuSuite* suite = CuSuiteNew();
 		SUITE_ADD_TEST(suite, TestFileWithoutLabelsHasExpectedNumberOfCommands);
+		SUITE_ADD_TEST(suite, TestFileWithLabelsHasExpectedNumberOfCommands);
 		return suite;
 	}
 
@@ -57,6 +59,12 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 	void TestFileWithoutLabelsHasExpectedNumberOfCommands(CuTest *tc) {
 		int expected = 6;
 		int actual = num_commands(ADD_ASM_STRIPPED);
+		CuAssertIntEquals(tc, expected, actual);
+	}
+
+	void TestFileWithLabelsHasExpectedNumberOfCommands(CuTest *tc) {
+		int expected = 16;
+		int actual = num_commands(MAX_ASM_STRIPPED);
 		CuAssertIntEquals(tc, expected, actual);
 	}
 	

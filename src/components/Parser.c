@@ -11,6 +11,7 @@
 static command_type_t command_type(const char* str);
 static bool is_a_command(const char* str);
 static bool is_c_command(const char* str);
+static bool is_label_definition(const char* str);
 
 static bool is_valid_destination(const char* str);
 static bool is_valid_computation(const char* str);
@@ -37,7 +38,11 @@ int num_commands(const char* str) {
 	for (int i = 0; i < strlen(str) + 1; i++) {
 		if (str[i] == '\n' || str[i] == '\0') {
 			current_command_pos = 0;
-			current_size = 1;
+			current_size = 1;					
+			if (command_type(current_command) == LBL) {
+				current_command = realloc(current_command, current_size);
+				continue;
+			}
 			count++;
 			if (command_type(current_command) == UNKNOWN)
 				return 0;
@@ -61,6 +66,8 @@ static command_type_t command_type(const char* str) {
 		return ADD;
 	if (is_c_command(str))
 		return COMP;
+	if (is_label_definition(str))
+		return LBL;
 	return UNKNOWN;
 }
 
@@ -68,6 +75,14 @@ static bool is_a_command(const char* str) {
 	return str[0] == '@';
 }
 
+static bool is_label_definition(const char* str) {
+	
+	bool has_parenthesis_first = str[0] == '(';
+	bool has_parenthesis_last = str[strlen(str) - 1] == ')';
+
+	
+	return has_parenthesis_first && has_parenthesis_last && strlen(str) > 2;
+}
 
 static bool is_c_command(const char* str) {
 	int assignment_operator_position = 0;
@@ -103,6 +118,7 @@ static bool is_c_command(const char* str) {
 	int computation_length = computation_termination_position - computation_operation_position;
 	char *computation = malloc(sizeof(char) * (computation_length + 1));
 	strncpy(computation, str+computation_operation_position, computation_length);
+	computation[computation_length] = '\0';
 	
 	if (!is_valid_computation(computation)) {
 		return false;
@@ -114,6 +130,7 @@ static bool is_c_command(const char* str) {
 		int jump_operation_length = strlen(str) - jump_operation_position;
 		char *jump_operation = malloc(sizeof(char) * (jump_operation_length + 1));
 		strncpy(jump_operation, str+jump_operation_position, jump_operation_length);
+		jump_operation[jump_operation_length] = '\0';
 		if (!is_valid_jump(jump_operation)) {
 			return false;
 		}
