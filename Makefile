@@ -1,19 +1,21 @@
-all_objects = $(src_objects) $(test_objects)
-test_objects = StripperTests.o CuTest.o 
-src_objects = main.o Error.o 
+tests_dir = src/tests/*
+libs_dir = libs/*
+components_dir = src/components/
 
-assembler: main 
-	gcc -o assembler $(all_objects)
+COMPILER = gcc
+FLAGS = -Wall -g
 
-main: tests
-	gcc -c src/main.c
+tests: tests.o libs.o components.o
+	$(COMPILER) $(FLAGS) -o tests *.o
 
-tests: error
-	gcc -c src/tests/StripperTests.c
-	gcc -c libs/CuTest.c
+tests.o: $(tests_dir).c $(tests_dir).h
+	$(COMPILER) $(FLAGS) -c $(tests_dir).c -o tests.o
 
-error:
-	gcc -c src/error/Error.c
+libs.o:
+	$(COMPILER) $(FLAGS) -c $(libs_dir).c -o libs.o
 
+components.o: $(components_dir)/*
+	$(COMPILER) $(FLAGS) -c $(components_dir)/Stripper.c -o stripper.o
+	$(COMPILER) $(FLAGS) -c $(components_dir)/Parser.c -o parser.o
 clean:
 	rm -f *.o
