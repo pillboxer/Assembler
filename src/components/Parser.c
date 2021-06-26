@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Parser.h"
+#include <ctype.h>
 
 #define VALID_DESTINATION_COUNT 7
 #define VALID_COMPUTATION_COUNT 28
 #define VALID_JUMP_COUNT 7
+#define WORD_LENGTH 16
 
 static command_type_t command_type(const char* str);
 static bool is_a_command(const char* str);
@@ -24,6 +26,30 @@ const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D",
 															"A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", 
 															"M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
 const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JGE", "JEQ", "JLT", "JLE", "JMP", "JNE" };
+
+// Should ultimately be static
+const char* parsed_a_command(const char* cmd);
+
+const char* parsed_a_command(const char* cmd) {
+	char *parsed = malloc(sizeof(char) * WORD_LENGTH + 1);
+	char lowered[strlen(cmd) + 1];
+
+	for (size_t i = 0; i < strlen(cmd); i++) 
+		lowered[i] = tolower(cmd[i]);
+
+	printf("Attempting to parse %s\n", lowered);
+	lowered[strlen(cmd)] = '\0';
+	parsed[0] = '\0';
+
+	if (lowered[1] == 'r') {
+		printf("Dealing with RX\n");
+	}
+
+	// Need to deal with more cases
+
+	return parsed;
+
+}
 
 int num_commands(const char* str) {	
 	int count = 0;
