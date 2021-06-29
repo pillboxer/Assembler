@@ -31,18 +31,27 @@ const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JGE", "JEQ", "JLT", "JLE",
 const char* parsed_a_command(const char* cmd);
 
 const char* parsed_a_command(const char* cmd) {
-	char *parsed = malloc(sizeof(char) * WORD_LENGTH + 1);
-	char lowered[strlen(cmd) + 1];
+	
+	char *parsed = calloc(WORD_LENGTH + 1, sizeof(char));
+	size_t cmd_length = strlen(cmd);
+	char lowered[cmd_length];
+	memset(lowered, 0, cmd_length*sizeof(char) + 1);
 
-	for (size_t i = 0; i < strlen(cmd); i++) 
+	for (size_t i = 0; i < cmd_length; i++) 
 		lowered[i] = tolower(cmd[i]);
 
 	printf("Attempting to parse %s\n", lowered);
-	lowered[strlen(cmd)] = '\0';
-	parsed[0] = '\0';
 
 	if (lowered[1] == 'r') {
 		printf("Dealing with RX\n");
+	}
+
+	// Deal with label
+
+	else {
+		char string_without_prefix[strlen(cmd)];
+		strncpy(string_without_prefix, lowered+1, cmd_length-1);
+		printf("String without prefix is %s\n", string_without_prefix);
 	}
 
 	// Need to deal with more cases
@@ -98,7 +107,7 @@ static command_type_t command_type(const char* str) {
 }
 
 static bool is_a_command(const char* str) {
-	return str[0] == '@';
+	return str[0] == '@' && strlen(str) > 1;
 }
 
 static bool is_label_definition(const char* str) {

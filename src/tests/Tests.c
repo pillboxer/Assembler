@@ -72,7 +72,7 @@ void TestACommandHasCorrectBinaryRepresentation(CuTest *tc);
 
 	void TestACommandHasCorrectBinaryRepresentation(CuTest *tc) {
 		char *expected = "00001";
-		char *actual = parsed_a_command("@R3");
+		char *actual = parsed_a_command("@33");
 		CuAssertStrEquals(tc, expected, actual);
 	}
 	
