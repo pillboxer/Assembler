@@ -35,23 +35,29 @@ const char* parsed_a_command(const char* cmd) {
 	char *parsed = calloc(WORD_LENGTH + 1, sizeof(char));
 	size_t cmd_length = strlen(cmd);
 	char lowered[cmd_length];
-	memset(lowered, 0, cmd_length*sizeof(char) + 1);
 
-	for (size_t i = 0; i < cmd_length; i++) 
-		lowered[i] = tolower(cmd[i]);
+	// No need for size to consider null terminator since we disregard '@'
+	memset(lowered, 0, cmd_length*sizeof(char));
+
+	// Disregard '@' prefix
+	for (size_t i = 1; i < cmd_length; i++) 
+		lowered[i-1] = tolower(cmd[i]);
 
 	printf("Attempting to parse %s\n", lowered);
 
-	if (lowered[1] == 'r') {
+	if (lowered[0] == 'r') {
 		printf("Dealing with RX\n");
 	}
 
 	// Deal with label
 
 	else {
-		char string_without_prefix[strlen(cmd)];
-		strncpy(string_without_prefix, lowered+1, cmd_length-1);
-		printf("String without prefix is %s\n", string_without_prefix);
+		// You are here! itoa not valid!
+		size_t as_integer_length = strlen(itoa(atoi(lowered)));
+		// Remember to subtract 1 from length of original command
+		// Don't want to check strlen of lowered as it's inefficient
+		bool is_integer_address = (cmd_length - 1) == as_integer_length;
+		printf("Is integer address: %d\n", is_integer_address);
 	}
 
 	// Need to deal with more cases
