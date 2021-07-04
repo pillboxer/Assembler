@@ -14,7 +14,7 @@ void strip(char** ptr) {
 
 static void strip_whitespace(char **ptr) {
 	
-	char *res = malloc(sizeof(*ptr));
+	char *res = malloc(strlen(*ptr));
 	int current_pos = 0;
 
 	for (int i = 0; i < strlen(*ptr); i++) {
@@ -29,7 +29,7 @@ static void strip_whitespace(char **ptr) {
 }
 
 static void strip_comments(char **ptr) {
-	char *res = malloc(sizeof(*ptr));
+	char *res = malloc(strlen(*ptr));
 	int current_pos = 0;
 	bool copy_allowed = true; 	
 	bool is_purely_comment = false;

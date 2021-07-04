@@ -11,14 +11,14 @@ void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 void TestFileWithoutLabelsHasExpectedNumberOfCommands(CuTest *tc);
 void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 void TestFileWithLabelsHasExpectedNumberOfCommands(CuTest *tc);
-void TestACommandHasCorrectBinaryRepresentation(CuTest *tc);
-
+void TestLabelACommandHasCorrectBinaryRepresentation(CuTest *tc);
+void TestPurelyNumericACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	// ## SUITES ##
 
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
 		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
-		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
+//		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
 		return suite;
 	}
 
@@ -26,7 +26,7 @@ void TestACommandHasCorrectBinaryRepresentation(CuTest *tc);
 		CuSuite* suite = CuSuiteNew();
 		SUITE_ADD_TEST(suite, TestFileWithoutLabelsHasExpectedNumberOfCommands);
 		SUITE_ADD_TEST(suite, TestFileWithLabelsHasExpectedNumberOfCommands);
-		SUITE_ADD_TEST(suite, TestACommandHasCorrectBinaryRepresentation);
+		SUITE_ADD_TEST(suite, TestPurelyNumericACommandHasCorrectBinaryRepresentation);
 		return suite;
 	}
 
@@ -70,12 +70,18 @@ void TestACommandHasCorrectBinaryRepresentation(CuTest *tc);
 		CuAssertIntEquals(tc, expected, actual);
 	}
 
-	void TestACommandHasCorrectBinaryRepresentation(CuTest *tc) {
+	void TestLabelACommandHasCorrectBinaryRepresentation(CuTest *tc) {
 		char *expected = "00001";
 		const char *actual = parsed_a_command("@3i3");
 		CuAssertStrEquals(tc, expected, (char*)actual);
 	}
 	
+	void TestPurelyNumericACommandHasCorrectBinaryRepresentation(CuTest *tc) {
+		char *expected = "0000100101010111";
+		const char* actual = parsed_a_command("@2391");
+		CuAssertStrEquals(tc, expected, (char*)actual);
+	}
+
 	// ## MAIN ##
 	int main() {
 		CuSuite* suite = CuSuiteNew();

@@ -11,21 +11,28 @@
 #define WORD_LENGTH 16
 
 static command_type_t command_type(const char* str);
-static bool is_a_command(const char* str);
-static bool is_c_command(const char* str);
-static bool is_label_definition(const char* str);
 
-static bool is_valid_destination(const char* str);
-static bool is_valid_computation(const char* str);
-static bool is_valid_jump(const char* str);
-static bool is_valid(const char* str, const char** argv, unsigned int count);
-
+// Constants
 const char* valid_destinations[VALID_DESTINATION_COUNT] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
 const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", 
 															"-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", 
 															"A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", 
 															"M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
 const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JGE", "JEQ", "JLT", "JLE", "JMP", "JNE" };
+
+// A Commands
+static bool is_a_command(const char* str);
+static const char* to_bin(int address);
+
+// C Commands
+static bool is_c_command(const char* str);
+static bool is_valid_destination(const char* str);
+static bool is_valid_computation(const char* str);
+static bool is_valid_jump(const char* str);
+static bool is_valid(const char* str, const char** argv, unsigned int count);
+
+// Labels
+static bool is_label_definition(const char* str);
 
 // Should ultimately be static
 const char* parsed_a_command(const char* cmd);
@@ -46,24 +53,40 @@ const char* parsed_a_command(const char* cmd) {
 	printf("Attempting to parse %s\n", lowered);
 
 	if (lowered[0] == 'r') {
-		printf("Dealing with RX\n");
+		// Fix: Deal with registers
 	}
-
-	// Deal with label
 
 	else {
-		// You are here! itoa not valid!
-		size_t as_integer_length = strlen(itoa(atoi(lowered)));
-		// Remember to subtract 1 from length of original command
-		// Don't want to check strlen of lowered as it's inefficient
-		bool is_integer_address = (cmd_length - 1) == as_integer_length;
-		printf("Is integer address: %d\n", is_integer_address);
+		char *remaining;
+		long address;
+		address = strtol(lowered, &remaining, 10);
+
+		if (strlen(remaining) == 0) {
+			int address = atoi(lowered);
+			return to_bin(address);
+		}
+		else {
+			// Fix: Deal with labels
+		}
+
 	}
-
-	// Need to deal with more cases
-
 	return parsed;
+}
 
+const char* to_bin(int address) {
+	char *binary_address = malloc(WORD_LENGTH + 1);
+	binary_address = strcpy(binary_address, "0000000000000000");
+	int quo = address;
+	int rem;
+
+	for (int i = 1; i <= WORD_LENGTH; i++) {
+		if (quo == 0)
+			break;
+		rem = quo % 2;
+		binary_address[WORD_LENGTH - i] = rem == 1 ? '1' : '0';
+		quo = quo / 2;
+	}
+	return binary_address;
 }
 
 int num_commands(const char* str) {	
