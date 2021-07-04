@@ -18,7 +18,7 @@ void TestPurelyNumericACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
 		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
-//		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
+		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
 		return suite;
 	}
 
