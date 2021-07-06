@@ -27,6 +27,9 @@ void error_string_for_code(int code, char **str) {
 		case FILE_NOT_FOUND:
 			*str = "The file doesn't exist";
 			break;
+		case NULL_POINTER:
+			*str = "Null pointer found";
+			break; 
 		default:
 			*str = "Unknown error.";
 		break;

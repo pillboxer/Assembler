@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "../error/Error.h"
 
 static void strip_whitespace(char **ptr);
 static void strip_comments(char **ptr);
@@ -11,10 +12,11 @@ void strip(char** ptr) {
 	strip_comments(ptr);
 }
 
-
 static void strip_whitespace(char **ptr) {
 	
-	char *res = malloc(strlen(*ptr));
+	char *res = malloc(strlen(*ptr) + 1);
+	if (res == NULL)
+		exit_with_error(NULL_POINTER);
 	int current_pos = 0;
 
 	for (int i = 0; i < strlen(*ptr); i++) {
@@ -25,11 +27,14 @@ static void strip_whitespace(char **ptr) {
 		current_pos++; 
 	}
 	res[current_pos] = '\0';
+	free(*ptr);
 	*ptr = res;
 }
 
 static void strip_comments(char **ptr) {
-	char *res = malloc(strlen(*ptr));
+	char *res = malloc(strlen(*ptr) + 1);
+	if (res == NULL)
+		exit_with_error(NULL_POINTER);
 	int current_pos = 0;
 	bool copy_allowed = true; 	
 	bool is_purely_comment = false;
@@ -55,5 +60,6 @@ static void strip_comments(char **ptr) {
 	}
 	
 	res[current_pos] = '\0';
+	free(*ptr);
 	*ptr = res;
 }

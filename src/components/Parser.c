@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "Parser.h"
 #include <ctype.h>
+#include "../error/Error.h"
 
 #define VALID_DESTINATION_COUNT 7
 #define VALID_COMPUTATION_COUNT 28
@@ -45,36 +46,38 @@ const char* parsed_a_command(const char* cmd) {
 
 	// No need for size to consider null terminator since we disregard '@'
 	memset(lowered, 0, cmd_length*sizeof(char));
+	int index = 0;
 
-	// Disregard '@' prefix
-	for (size_t i = 1; i < cmd_length; i++) 
-		lowered[i-1] = tolower(cmd[i]);
+	// Disregard '@' and 'R'
+	for (size_t i = 1; i < cmd_length; i++) {
+		if (i == 0 || (i == 1 && tolower(cmd[i]) == 'r'))
+			continue;
+		lowered[index++] = tolower(cmd[i]);
+	}
 
 	printf("Attempting to parse %s\n", lowered);
+	char *remaining;
+	strtol(lowered, &remaining, 10);
 
-	if (lowered[0] == 'r') {
-		// Fix: Deal with registers
+	if (strlen(remaining) != 0) {
+		printf("we must be dealing with a label");
 	}
 
 	else {
-		char *remaining;
-		long address;
-		address = strtol(lowered, &remaining, 10);
-
-		if (strlen(remaining) == 0) {
-			int address = atoi(lowered);
-			return to_bin(address);
-		}
-		else {
-			// Fix: Deal with labels
-		}
-
-	}
+		char address_string[cmd_length];
+		strncpy(address_string, lowered, cmd_length);
+		int address = atoi(address_string);
+		return to_bin(address);
+	}	
 	return parsed;
 }
 
 const char* to_bin(int address) {
 	char *binary_address = malloc(WORD_LENGTH + 1);
+
+	if (binary_address == NULL)
+		exit_with_error(NULL_POINTER);
+
 	binary_address = strcpy(binary_address, "0000000000000000");
 	int quo = address;
 	int rem;
@@ -96,8 +99,7 @@ int num_commands(const char* str) {
 	char *current_command = malloc(sizeof(char) * current_size);
 
 	if (current_command == NULL)
-		// Change to exit with error
-		return 0;
+		exit_with_error(NULL_POINTER);
 	
 	for (int i = 0; i < strlen(str) + 1; i++) {
 		if (str[i] == '\n' || str[i] == '\0') {
@@ -181,6 +183,8 @@ static bool is_c_command(const char* str) {
 
 	int computation_length = computation_termination_position - computation_operation_position;
 	char *computation = malloc(sizeof(char) * (computation_length + 1));
+	if (computation == NULL)
+		exit_with_error(NULL_POINTER);
 	strncpy(computation, str+computation_operation_position, computation_length);
 	computation[computation_length] = '\0';
 	
@@ -193,6 +197,8 @@ static bool is_c_command(const char* str) {
 	if (jump_operation_position != 0) {
 		int jump_operation_length = strlen(str) - jump_operation_position;
 		char *jump_operation = malloc(sizeof(char) * (jump_operation_length + 1));
+		if (jump_operation == NULL)
+			exit_with_error(NULL_POINTER);
 		strncpy(jump_operation, str+jump_operation_position, jump_operation_length);
 		jump_operation[jump_operation_length] = '\0';
 		if (!is_valid_jump(jump_operation)) {
