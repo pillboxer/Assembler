@@ -2,64 +2,37 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "../error/Error.h"
 
-static void strip_whitespace(char **ptr);
-static void strip_comments(char **ptr);
+void strip_spaces (char* dst, const char* src)
+{
+	printf("D is %s\n and S is %s\n", dst, src);
 
-void strip(char** ptr) {
-	strip_whitespace(ptr);
-	strip_comments(ptr);
+  while(*src != '\0')
+  {
+    if(!isspace(*src)) // if not string
+    {
+      *dst = *src; // then copy
+      dst++;
+    }
+    src++;
+  }
+  *dst = '\0';
 }
 
-static void strip_whitespace(char **ptr) {
-	
-	char *res = malloc(strlen(*ptr) + 1);
-	if (res == NULL)
-		exit_with_error(NULL_POINTER);
-	int current_pos = 0;
-
-	for (int i = 0; i < strlen(*ptr); i++) {
-		if (((*ptr)[i] == ' ') || ((*ptr)[i] == '\n' && ((*ptr)[i-1] == '\n' || (*ptr)[i+1] == '\0'))) {
-			continue;
+void strip_comments(char* dst, const char* src) {
+	bool copy = true;
+	int index = 0;
+	for (int i = 0; i < strlen(src); i++) {
+		if (src[i] == '/' && src[i+1] == '/')
+			copy = false;
+		if (copy) {
+			dst[index++] = src[i];
 		}
-		res[current_pos] = (*ptr)[i];
-		current_pos++; 
+		if (src[i] == '\n')
+			printf("marking copy as true");
+			copy = true;
 	}
-	res[current_pos] = '\0';
-	free(*ptr);
-	*ptr = res;
-}
 
-static void strip_comments(char **ptr) {
-	char *res = malloc(strlen(*ptr) + 1);
-	if (res == NULL)
-		exit_with_error(NULL_POINTER);
-	int current_pos = 0;
-	bool copy_allowed = true; 	
-	bool is_purely_comment = false;
-
-	for (int i = 0; i < strlen(*ptr); i++) {
-
-		if ((*ptr)[i] == '\n' && !copy_allowed) { 
-			copy_allowed = true;
-			if (is_purely_comment)
-				continue;
-		}
-
-		if ((*ptr)[i] == '/' && (*ptr)[i+1] == '/') {
-			is_purely_comment = (*ptr)[i-1] == '\n' || i == 0;
-			copy_allowed = false;
-			continue;
-		}
-
-		if (copy_allowed) {
-			res[current_pos] = (*ptr)[i];
-			current_pos++;
-		}
-	}
-	
-	res[current_pos] = '\0';
-	free(*ptr);
-	*ptr = res;
 }
