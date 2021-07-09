@@ -51,11 +51,13 @@ void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc) {
 		char no_comments[strlen(MAX_ASM_SRC) + 1];
 		char no_whitespace[strlen(MAX_ASM_STRIPPED) + 1];
+		char no_labels[strlen(MAX_ASM_STRIPPED + 1)];
 		char src[strlen(MAX_ASM_SRC) + 1];
 		strcpy(src, MAX_ASM_SRC);
 		strip_comments(no_comments, src);
 		strip_spaces(no_whitespace, no_comments);
-		CuAssertStrEquals(tc, (char*)MAX_ASM_STRIPPED, no_whitespace);
+		strip_labels(no_labels, no_whitespace);
+		CuAssertStrEquals(tc, (char*)MAX_ASM_STRIPPED, no_labels);
 	}
 
 	// ## PARSER ##
