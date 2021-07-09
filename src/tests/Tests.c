@@ -20,7 +20,7 @@ void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
 		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
-//		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
+		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
 		return suite;
 	}
 
@@ -39,23 +39,23 @@ void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	// ## STRIPPER ##
 
 	void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc) {
-		char destination[strlen(ADD_ASM_SRC) + 1];
+		char no_comments[strlen(ADD_ASM_SRC) + 1];
 		char src[strlen(ADD_ASM_SRC) + 1];
+		char no_whitespace[strlen(ADD_ASM_SRC) + 1];
 		strcpy(src, ADD_ASM_SRC);
-		strip_comments(destination, src);
-		// now use the destination as the source etc
-		CuAssertStrEquals(tc, ADD_ASM_STRIPPED, destination);
+		strip_comments(no_comments, src);
+		strip_spaces(no_whitespace, no_comments);
+		CuAssertStrEquals(tc, (char*)ADD_ASM_STRIPPED, no_whitespace);
 	}
 
 	void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc) {
-//		char *input = malloc(sizeof(char) * (strlen(MAX_ASM_SRC) + 1));
-//		char *expected = malloc(sizeof(char) * (strlen(MAX_ASM_STRIPPED) + 1));
-//		strcpy(input, MAX_ASM_SRC);
-//		strcpy(expected, MAX_ASM_STRIPPED);
-//		strip(&input);		
-//		CuAssertStrEquals(tc, expected, input);
-//		free(input);
-//		free(expected);
+		char no_comments[strlen(MAX_ASM_SRC) + 1];
+		char no_whitespace[strlen(MAX_ASM_STRIPPED) + 1];
+		char src[strlen(MAX_ASM_SRC) + 1];
+		strcpy(src, MAX_ASM_SRC);
+		strip_comments(no_comments, src);
+		strip_spaces(no_whitespace, no_comments);
+		CuAssertStrEquals(tc, (char*)MAX_ASM_STRIPPED, no_whitespace);
 	}
 
 	// ## PARSER ##
