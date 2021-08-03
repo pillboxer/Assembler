@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "../error/Error.h"
-
+#include "HashMap.h"
 void strip_spaces (char* dst, const char* src) {
 
 	bool have_reached_printable_char = false;
@@ -43,7 +43,7 @@ void strip_comments(char* dst, const char* src) {
 	*dst = '\0';
 }
 
-void strip_labels(char* dst, const char* src) {
+HashMap* strip_labels(char* dst, const char* src) {
 
 	printf("SRC is %s\n", src);
 
@@ -54,6 +54,7 @@ void strip_labels(char* dst, const char* src) {
 	char current_label[256];
 	int current_label_index = 0;
 	char last_copied;
+	HashMap* hash_map = hash_map_create();
 	while(*src != '\0') {
 		if (*src == '\n') {
 			new_command = true;
@@ -86,4 +87,5 @@ void strip_labels(char* dst, const char* src) {
 		src++;
 	}
 		*dst = '\0';
+		return hash_map;
 }

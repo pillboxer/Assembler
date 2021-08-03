@@ -17,6 +17,7 @@ libs.o: $(libs_dir)/*
 components.o: $(components_dir)/*
 	$(COMPILER) $(FLAGS) -c $(components_dir)Parser.c -o parser.o
 	$(COMPILER) $(FLAGS) -c $(components_dir)Stripper.c -o stripper.o
+	$(COMPILER) $(FLAGS) -c $(components_dir)HashMap.c -o hash_map.o
 
 error.o: $(error_dir)/*
 	$(COMPILER) $(FLAGS) -c $(error_dir)*.c -o error.o
