@@ -68,8 +68,11 @@ HashMap* strip_labels(char* dst, const char* src) {
 			save_command = false;
 			current_label[current_label_index] = '\0';
 			current_command--;
-			// We now need to save this label
-			printf("The label represents command %d\n", current_command + 1);
+			for (int i = 0; i <= strlen(current_label); i++) {
+				char lowered = tolower(current_label[i]);
+				current_label[i] = lowered;
+			}
+			hash_map_put(hash_map, current_label, current_command+1);
 			current_label_index = 0;
 		}
 		if (save_command) {

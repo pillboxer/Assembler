@@ -30,6 +30,9 @@ void error_string_for_code(int code, char **str) {
 		case NULL_POINTER:
 			*str = "Null pointer found";
 			break; 
+		case UNKNOWN_COMMAND:
+			*str = "Unrecognized command";
+			break;
 		default:
 			*str = "Unknown error.";
 		break;

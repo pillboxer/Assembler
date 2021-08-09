@@ -8,30 +8,20 @@
 
 void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
-void TestFileWithoutLabelsHasExpectedNumberOfCommands(CuTest *tc);
+void TestProgramIsParsedCorrectly(CuTest *tc);
 void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
-void TestFileWithLabelsHasExpectedNumberOfCommands(CuTest *tc);
-void TestLabelACommandHasCorrectBinaryRepresentation(CuTest *tc);
-void TestPurelyNumericACommandHasCorrectBinaryRepresentation(CuTest *tc);
-void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc);
-
 	// ## SUITES ##
 
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
-		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
-		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
+//		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
+//		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
 		return suite;
 	}
 
 	CuSuite* ParserGetSuite() {
 		CuSuite* suite = CuSuiteNew();
-		SUITE_ADD_TEST(suite, TestFileWithoutLabelsHasExpectedNumberOfCommands);
-		SUITE_ADD_TEST(suite, TestFileWithLabelsHasExpectedNumberOfCommands);
-		SUITE_ADD_TEST(suite, TestLabelACommandHasCorrectBinaryRepresentation);
-		SUITE_ADD_TEST(suite, TestPurelyNumericACommandHasCorrectBinaryRepresentation);
-		SUITE_ADD_TEST(suite, TestRegisterACommandHasCorrectBinaryRepresentation);
-
+		SUITE_ADD_TEST(suite, TestProgramIsParsedCorrectly);
 		return suite;
 	}
 
@@ -61,35 +51,17 @@ void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc);
 	}
 
 	// ## PARSER ##
-
-	// # Commands
-	void TestFileWithoutLabelsHasExpectedNumberOfCommands(CuTest *tc) {
-		int expected = 6;
-		int actual = num_commands(ADD_ASM_STRIPPED);
-		CuAssertIntEquals(tc, expected, actual);
-	}
-
-	void TestFileWithLabelsHasExpectedNumberOfCommands(CuTest *tc) {
-		int expected = 16;
-		int actual = num_commands(MAX_ASM_STRIPPED);
-		CuAssertIntEquals(tc, expected, actual);
-	}
-
-	void TestLabelACommandHasCorrectBinaryRepresentation(CuTest *tc) {
-		char *expected = "00001";
-		const char *actual = parsed_a_command("@3i3");
-		CuAssertStrEquals(tc, expected, (char*)actual);
-	}
-
-	void TestRegisterACommandHasCorrectBinaryRepresentation(CuTest *tc) {
-		char *expected = "0000000000001101";
-		const char *actual = parsed_a_command("@R13");
-		CuAssertStrEquals(tc, expected, (char*)actual);
-	}
-	void TestPurelyNumericACommandHasCorrectBinaryRepresentation(CuTest *tc) {
-		char *expected = "0000100101010111";
-		const char* actual = parsed_a_command("@2391");
-		CuAssertStrEquals(tc, expected, (char*)actual);
+	void TestProgramIsParsedCorrectly(CuTest *tc) {
+		char no_comments[strlen(MAX_ASM_SRC) + 1];
+		char parsed[strlen(MAX_ASM_PARSED) + 1];
+		char no_whitespace[strlen(MAX_ASM_STRIPPED) + 1];
+		char no_labels[strlen(MAX_ASM_STRIPPED + 1)];
+		char src[strlen(MAX_ASM_SRC) + 1];
+		strcpy(src, MAX_ASM_SRC);
+		strip_comments(no_comments, src);
+		strip_spaces(no_whitespace, no_comments);
+		HashMap* hash_map = strip_labels(no_labels, no_whitespace);
+		parse(parsed, no_labels, hash_map);
 	}
 
 	// ## MAIN ##

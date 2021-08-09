@@ -21,6 +21,8 @@ const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D",
 															"M-1", "D+M", "D-M", "M-D", "D&M", "D|M" };
 const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JGE", "JEQ", "JLT", "JLE", "JMP", "JNE" };
 
+
+
 // A Commands
 static bool is_a_command(const char* str);
 static const char* to_bin(int address);
@@ -32,14 +34,37 @@ static bool is_valid_computation(const char* str);
 static bool is_valid_jump(const char* str);
 static bool is_valid(const char* str, const char** argv, unsigned int count);
 
-// Labels
-static bool is_label_definition(const char* str);
-
 // Should ultimately be static
-const char* parsed_a_command(const char* cmd);
+const char* parsed_a_command(const char* cmd, HashMap* hash_map);
 
-const char* parsed_a_command(const char* cmd) {
-	
+static const char* parse_command(char *cmd, HashMap* hash_map) {
+	if (is_a_command(cmd)) {
+		return parsed_a_command(cmd, hash_map);
+	}
+	else if (is_c_command(cmd)) {
+		return "Parse C";
+	}
+	else {
+		exit_with_error(UNKNOWN_COMMAND);
+	}
+}
+
+void parse(char* dst, char* src, HashMap* hash_map) {
+	char current_label[256];
+	int current_label_position = 0;
+	for (int i = 0; i < strlen(src); i++) {
+		if (src[i] == '\n') {
+			current_label[current_label_position] = '\0';
+			parse_command(current_label, hash_map);
+			current_label_position = 0;
+			continue;
+		}
+			current_label[current_label_position++] = src[i];
+	}
+}
+
+
+const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
 	char *parsed = calloc(WORD_LENGTH + 1, sizeof(char));
 	size_t cmd_length = strlen(cmd);
 	char lowered[cmd_length];
@@ -55,12 +80,12 @@ const char* parsed_a_command(const char* cmd) {
 		lowered[index++] = tolower(cmd[i]);
 	}
 
-	printf("Attempting to parse %s\n", lowered);
 	char *remaining;
 	strtol(lowered, &remaining, 10);
 
 	if (strlen(remaining) != 0) {
-		printf("we must be dealing with a label");
+		int value = hash_map_get(hash_map, remaining);
+		printf("Value of %s is %d\n", remaining, value);
 	}
 
 	else {
@@ -132,8 +157,6 @@ static command_type_t command_type(const char* str) {
 		return ADD;
 	if (is_c_command(str))
 		return COMP;
-	if (is_label_definition(str))
-		return LBL;
 	return UNKNOWN;
 }
 
@@ -141,14 +164,6 @@ static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
-static bool is_label_definition(const char* str) {
-	
-	bool has_parenthesis_first = str[0] == '(';
-	bool has_parenthesis_last = str[strlen(str) - 1] == ')';
-
-	
-	return has_parenthesis_first && has_parenthesis_last && strlen(str) > 2;
-}
 
 static bool is_c_command(const char* str) {
 	int assignment_operator_position = 0;

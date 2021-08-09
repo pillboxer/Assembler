@@ -1,9 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "HashMap.h"
 
 static int hashed(char* arg) {
-	return arg % NUM_BUCKETS;
+	// http://www.cse.yorku.ca/~oz/hash.html
+	unsigned long hash = 5381;
+	int c;
+	while ((c = *arg++))
+		hash = ((hash << 5) + hash) + c; 
+	return hash % NUM_BUCKETS;
 }
 
 void print_list(Node* head, int bucket) {
@@ -25,7 +31,7 @@ HashMap* hash_map_create() {
 /** value will always be non-negative. */
 void hash_map_put(HashMap* hash_map, char* key, int value) {
 	int hashed_key = hashed(key);
-	char* result = hash_map_get(hash_map, key);
+	int result = hash_map_get(hash_map, key);
 	if (result != -1) {
 		Node *current = hash_map->buckets[hashed_key];
 		while (current->key != key) {
@@ -36,14 +42,16 @@ void hash_map_put(HashMap* hash_map, char* key, int value) {
 	else {
 		if (hash_map->buckets[hashed_key] == NULL) {
 			hash_map->buckets[hashed_key] = malloc(sizeof(Node));
-			hash_map->buckets[hashed_key]->key = key;
+			hash_map->buckets[hashed_key]->key =  malloc(sizeof(char) * (strlen(key) + 1));
+			strcpy(hash_map->buckets[hashed_key]->key, key);
 			hash_map->buckets[hashed_key]->value = value;
 			hash_map->buckets[hashed_key]->next = NULL;
 		}
 		else {
 			Node *current = hash_map->buckets[hashed_key];
 			Node *new = malloc(sizeof(Node));
-			new->key = key;
+			new->key = malloc(sizeof(char) * (strlen(key) + 1));
+			strcpy(new->key, key);
 			new->value = value;
 			new->next = NULL;
 			while (current->next != NULL) {
@@ -62,7 +70,8 @@ int hash_map_get(HashMap* hash_map, char* key) {
 	Node *current = hash_map->buckets[hashed_key];
 	int returned = -1;
 	while (current != NULL) {
-		if (current->key == key) {
+		if (strcmp(current->key, key) == 0) {
+			printf("Current value is %d\n", current->value);
 			returned = current->value;
 			break;
 		}
