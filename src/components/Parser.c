@@ -37,7 +37,7 @@ static bool is_valid(const char* str, const char** argv, unsigned int count);
 // Should ultimately be static
 const char* parsed_a_command(const char* cmd, HashMap* hash_map);
 
-static const char* parse_command(char *cmd, HashMap* hash_map) {
+static const char* parsed_command(char *cmd, HashMap* hash_map) {
 	if (is_a_command(cmd)) {
 		return parsed_a_command(cmd, hash_map);
 	}
@@ -52,20 +52,25 @@ static const char* parse_command(char *cmd, HashMap* hash_map) {
 void parse(char* dst, char* src, HashMap* hash_map) {
 	char current_label[256];
 	int current_label_position = 0;
-	for (int i = 0; i < strlen(src); i++) {
-		if (src[i] == '\n') {
+	int dest_position = 0;
+	for (int i = 0; i <= strlen(src); i++) {
+		if (src[i] == '\n' || src[i] == '\0') {
 			current_label[current_label_position] = '\0';
-			parse_command(current_label, hash_map);
+			const char* parsed = parsed_command(current_label, hash_map);
+			for (int j = 0; j < strlen(parsed); j++) {
+				dst[dest_position++] = parsed[j];	
+			}
 			current_label_position = 0;
+			dst[dest_position++] = '\n';
 			continue;
 		}
 			current_label[current_label_position++] = src[i];
 	}
+	dst[dest_position] = '\0';
 }
 
 
 const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
-	char *parsed = calloc(WORD_LENGTH + 1, sizeof(char));
 	size_t cmd_length = strlen(cmd);
 	char lowered[cmd_length];
 
@@ -85,16 +90,14 @@ const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
 
 	if (strlen(remaining) != 0) {
 		int value = hash_map_get(hash_map, remaining);
-		printf("Value of %s is %d\n", remaining, value);
+		return to_bin(value);
 	}
-
 	else {
 		char address_string[cmd_length];
 		strncpy(address_string, lowered, cmd_length);
 		int address = atoi(address_string);
 		return to_bin(address);
 	}	
-	return parsed;
 }
 
 const char* to_bin(int address) {

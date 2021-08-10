@@ -60,8 +60,6 @@ void hash_map_put(HashMap* hash_map, char* key, int value) {
 			current->next = new;
 		}
 	}
-	Node *head = hash_map->buckets[hashed_key];
-	print_list(head, hashed_key);
 }
 
 /** Returns the value to which the specified key is mapped, or -1 if this map contains no mapping for the key */
@@ -71,7 +69,6 @@ int hash_map_get(HashMap* hash_map, char* key) {
 	int returned = -1;
 	while (current != NULL) {
 		if (strcmp(current->key, key) == 0) {
-			printf("Current value is %d\n", current->value);
 			returned = current->value;
 			break;
 		}
@@ -100,7 +97,6 @@ void hash_map_remove(HashMap* hash_map, char* key) {
 			current->next = new_next;
 			old_next = NULL;
 		}
-		print_list(hash_map->buckets[hashed_key], hashed_key);
 	}
 }
 

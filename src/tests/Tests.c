@@ -14,8 +14,8 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
 	CuSuite* StripperGetSuite() {
 		CuSuite* suite = CuSuiteNew();
-//		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
-//		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
+		SUITE_ADD_TEST(suite, TestStringWithCommentsAndNewLinesIsStripped);
+		SUITE_ADD_TEST(suite, TestStringContainingLabelsWithCommentsAndNewLinesIsStripped);
 		return suite;
 	}
 
@@ -62,6 +62,7 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 		strip_spaces(no_whitespace, no_comments);
 		HashMap* hash_map = strip_labels(no_labels, no_whitespace);
 		parse(parsed, no_labels, hash_map);
+		CuAssertStrEquals(tc, (char*)MAX_ASM_PARSED, parsed);
 	}
 
 	// ## MAIN ##
