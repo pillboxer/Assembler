@@ -34,8 +34,8 @@ static bool is_valid_computation(const char* str);
 static bool is_valid_jump(const char* str);
 static bool is_valid(const char* str, const char** argv, unsigned int count);
 
-// Should ultimately be static
-const char* parsed_a_command(const char* cmd, HashMap* hash_map);
+static const char* parsed_a_command(const char* cmd, HashMap* hash_map);
+static const char* parsed_c_command(const char* cmd);
 
 static const char* parsed_command(char *cmd, HashMap* hash_map) {
 	if (is_a_command(cmd)) {
@@ -167,16 +167,31 @@ static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
+static void get_destination(char** str, char* cmd) {
+	int assignment_operator_position = 0;
+	for (int i = 0; i < strlen(cmd); i++) {
+		if (cmd[i] == '=') {
+				assignment_operator_position = i;
+			}
+	}
+	if (assignment_operator_position != 0) {
+		*str = realloc(*str, sizeof(char) * (assignment_operator_position + 1));
+		strncpy(*str, cmd, assignment_operator_position);
+		(*str)[assignment_operator_position] = '\0';
+	}
+	else {
+		*str = NULL;
+	}
+}
+
 
 static bool is_c_command(const char* str) {
-	int assignment_operator_position = 0;
 	int computation_operation_position = 0;
 	int jump_operation_position = 0;
 	int computation_termination_position = 0;
 
 	for (int i = 0; i < strlen(str); i++) {
 		if (str[i] == '=') {
-			assignment_operator_position = i;
 			computation_operation_position = i+1;
 		}
 		if (str[i] == ';') {
@@ -184,17 +199,15 @@ static bool is_c_command(const char* str) {
 			computation_termination_position = i;
 		}
 	}
-
-	if (assignment_operator_position != 0) {
-		char *destination = malloc(sizeof(char) * (assignment_operator_position + 1));
-		strncpy(destination, str, assignment_operator_position);
-		destination[assignment_operator_position] = '\0';
+	char* destination = malloc(sizeof(char));
+	get_destination(&destination, str);
+	if (destination != NULL) {
 		if (!is_valid_destination(destination)) {
+			printf("Returning false\n");
 			return false;
 		}
-		free(destination);
+		printf("Destination is %s for %s\n", destination, str);
 	}
-
 	if (computation_termination_position == 0) {
 		computation_termination_position = strlen(str);
 	}
