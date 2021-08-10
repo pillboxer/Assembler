@@ -11,8 +11,6 @@
 #define VALID_JUMP_COUNT 7
 #define WORD_LENGTH 16
 
-static command_type_t command_type(const char* str);
-
 // Constants
 const char* valid_destinations[VALID_DESTINATION_COUNT] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
 const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", 
@@ -29,25 +27,18 @@ static const char* to_bin(int address);
 
 // C Commands
 static bool is_c_command(const char* str);
+static void get_destination(char** str, const char* cmd);
 static bool is_valid_destination(const char* str);
 static bool is_valid_computation(const char* str);
 static bool is_valid_jump(const char* str);
 static bool is_valid(const char* str, const char** argv, unsigned int count);
 
+// Parsed
+static const char* parsed_command(char *cmd, HashMap* hash_map);
 static const char* parsed_a_command(const char* cmd, HashMap* hash_map);
-static const char* parsed_c_command(const char* cmd);
+// static const char* parsed_c_command(const char* cmd);
 
-static const char* parsed_command(char *cmd, HashMap* hash_map) {
-	if (is_a_command(cmd)) {
-		return parsed_a_command(cmd, hash_map);
-	}
-	else if (is_c_command(cmd)) {
-		return "Parse C";
-	}
-	else {
-		exit_with_error(UNKNOWN_COMMAND);
-	}
-}
+// ********************************* //
 
 void parse(char* dst, char* src, HashMap* hash_map) {
 	char current_label[256];
@@ -69,6 +60,17 @@ void parse(char* dst, char* src, HashMap* hash_map) {
 	dst[dest_position] = '\0';
 }
 
+static const char* parsed_command(char *cmd, HashMap* hash_map) {
+	if (is_a_command(cmd)) {
+		return parsed_a_command(cmd, hash_map);
+	}
+	else if (is_c_command(cmd)) {
+		return "Parse C";
+	}
+	else {
+		exit_with_error(UNKNOWN_COMMAND);
+	}
+}
 
 const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
 	size_t cmd_length = strlen(cmd);
@@ -120,54 +122,13 @@ const char* to_bin(int address) {
 	return binary_address;
 }
 
-int num_commands(const char* str) {	
-	int count = 0;
-	int current_size = 1;
-	int current_command_pos = 0;
-	char *current_command = malloc(sizeof(char) * current_size);
-
-	if (current_command == NULL)
-		exit_with_error(NULL_POINTER);
-	
-	for (int i = 0; i < strlen(str) + 1; i++) {
-		if (str[i] == '\n' || str[i] == '\0') {
-			current_command_pos = 0;
-			current_size = 1;					
-			if (command_type(current_command) == LBL) {
-				current_command = realloc(current_command, current_size);
-				continue;
-			}
-			count++;
-			if (command_type(current_command) == UNKNOWN)
-				return 0;
-			current_command = realloc(current_command, current_size);
-		}
-		else {
-			current_size++;
-			current_command[current_command_pos] = str[i];
-			current_command[current_command_pos + 1] = '\0';
-			current_command_pos++;
-			current_command = realloc(current_command, current_size);
-		}
-	}
-
-	free(current_command);
-	return count;
-}
-
-static command_type_t command_type(const char* str) {
-	if (is_a_command(str)) 
-		return ADD;
-	if (is_c_command(str))
-		return COMP;
-	return UNKNOWN;
-}
+// ********************************8 //
 
 static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
-static void get_destination(char** str, char* cmd) {
+static void get_destination(char** str, const char* cmd) {
 	int assignment_operator_position = 0;
 	for (int i = 0; i < strlen(cmd); i++) {
 		if (cmd[i] == '=') {
@@ -183,7 +144,6 @@ static void get_destination(char** str, char* cmd) {
 		*str = NULL;
 	}
 }
-
 
 static bool is_c_command(const char* str) {
 	int computation_operation_position = 0;
@@ -237,10 +197,10 @@ static bool is_c_command(const char* str) {
 		}
 		free(jump_operation);
 	}
-
 	return true;
-
 }
+
+// ************************** //
 
 static bool is_valid_destination(const char* str) {
 	return is_valid(str, valid_destinations, VALID_DESTINATION_COUNT);
