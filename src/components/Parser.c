@@ -12,7 +12,7 @@
 #define WORD_LENGTH 16
 
 // Constants
-const char* valid_destinations[VALID_DESTINATION_COUNT] = { "D", "M", "A", "MD", "AM", "AD", "AMD" };
+const char* valid_destinations[VALID_DESTINATION_COUNT] = { "M", "D", "MD" "A", "AM", "AD", "AMD" };
 const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", 
 															"-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", 
 															"A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", 
@@ -28,10 +28,9 @@ static const char* to_bin(int address);
 // C Commands
 static bool is_c_command(const char* str);
 static void get_destination(char** str, const char* cmd);
-static bool is_valid_destination(const char* str);
-static bool is_valid_computation(const char* str);
-static bool is_valid_jump(const char* str);
-static bool is_valid(const char* str, const char** argv, unsigned int count);
+static int destination_address(const char* str);
+static int jump_address(const char* str);
+static int get_address(const char* str, const char** argv, unsigned int count);
 
 // Parsed
 static const char* parsed_command(char *cmd, HashMap* hash_map);
@@ -128,98 +127,91 @@ static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
-static void get_destination(char** str, const char* cmd) {
+static int get_destination_address(const char* cmd) {
 	int assignment_operator_position = 0;
 	for (int i = 0; i < strlen(cmd); i++) {
 		if (cmd[i] == '=') {
-				assignment_operator_position = i;
-			}
+			assignment_operator_position = i;
+		}
 	}
 	if (assignment_operator_position != 0) {
-		*str = realloc(*str, sizeof(char) * (assignment_operator_position + 1));
-		strncpy(*str, cmd, assignment_operator_position);
-		(*str)[assignment_operator_position] = '\0';
+		char destination[assignment_operator_position + 1];
+		strncpy(destination, cmd, assignment_operator_position);
+		printf("now checking destination %s\n", destination);
+		return destination_address(destination);
 	}
 	else {
-		*str = NULL;
+		printf("Returning -1 for %s\n", cmd);
+		return -1;
 	}
 }
 
-static bool is_c_command(const char* str) {
+static bool is_c_command(const char* cmd) {
 	int computation_operation_position = 0;
 	int jump_operation_position = 0;
 	int computation_termination_position = 0;
 
-	for (int i = 0; i < strlen(str); i++) {
-		if (str[i] == '=') {
+	for (int i = 0; i < strlen(cmd); i++) {
+		if (cmd[i] == '=') {
 			computation_operation_position = i+1;
 		}
-		if (str[i] == ';') {
+		if (cmd[i] == ';') {
 			jump_operation_position = i+1;
 			computation_termination_position = i;
 		}
 	}
-	char* destination = malloc(sizeof(char));
-	get_destination(&destination, str);
-	if (destination != NULL) {
-		if (!is_valid_destination(destination)) {
-			printf("Returning false\n");
-			return false;
-		}
-		printf("Destination is %s for %s\n", destination, str);
+	int address = get_destination_address(cmd);
+	if (address != -1) {
+		printf("Destination address for cmd %s is %d\n", cmd, address);
 	}
-	if (computation_termination_position == 0) {
-		computation_termination_position = strlen(str);
-	}
-
-	int computation_length = computation_termination_position - computation_operation_position;
-	char *computation = malloc(sizeof(char) * (computation_length + 1));
-	if (computation == NULL)
-		exit_with_error(NULL_POINTER);
-	strncpy(computation, str+computation_operation_position, computation_length);
-	computation[computation_length] = '\0';
-	
-	if (!is_valid_computation(computation)) {
-		return false;
-	}
-
-	free(computation);
-
-	if (jump_operation_position != 0) {
-		int jump_operation_length = strlen(str) - jump_operation_position;
-		char *jump_operation = malloc(sizeof(char) * (jump_operation_length + 1));
-		if (jump_operation == NULL)
-			exit_with_error(NULL_POINTER);
-		strncpy(jump_operation, str+jump_operation_position, jump_operation_length);
-		jump_operation[jump_operation_length] = '\0';
-		if (!is_valid_jump(jump_operation)) {
-			return false;
-		}
-		free(jump_operation);
-	}
+//	if (computation_termination_position == 0) {
+//		computation_termination_position = strlen(cmd);
+//	}
+//
+//	int computation_length = computation_termination_position - computation_operation_position;
+//	char *computation = malloc(sizeof(char) * (computation_length + 1));
+//	if (computation == NULL)
+//		exit_with_error(NULL_POINTER);
+//	strncpy(computation, cmd+computation_operation_position, computation_length);
+//	computation[computation_length] = '\0';
+//	
+//	if (!is_valid_computation(computation)) {
+//		return false;
+//	}
+//
+//	free(computation);
+//
+//	if (jump_operation_position != 0) {
+//		int jump_operation_length = strlen(cmd) - jump_operation_position;
+//		char *jump_operation = malloc(sizeof(char) * (jump_operation_length + 1));
+//		if (jump_operation == NULL)
+//			exit_with_error(NULL_POINTER);
+//		strncpy(jump_operation, cmd+jump_operation_position, jump_operation_length);
+//		jump_operation[jump_operation_length] = '\0';
+//		if (is_valid_jump(jump_operation)) {
+//			return false;
+//		}
+//		free(jump_operation);
+//	}
 	return true;
 }
 
 // ************************** //
 
-static bool is_valid_destination(const char* str) {
-	return is_valid(str, valid_destinations, VALID_DESTINATION_COUNT);
+static int destination_address(const char* str) {
+	return get_address(str, valid_destinations, VALID_DESTINATION_COUNT);
 }
 
-static bool is_valid_computation(const char* str) {
-	return is_valid(str, valid_computations, VALID_COMPUTATION_COUNT);
+static int jump_address(const char* str) {
+	return get_address(str, valid_jumps, VALID_JUMP_COUNT);
 }
-
-static bool is_valid_jump(const char* str) {
-	return is_valid(str, valid_jumps, VALID_JUMP_COUNT);
-}
-static bool is_valid(const char* str, const char** argv, unsigned int count) {
+static int get_address(const char* str, const char** argv, unsigned int count) {
 	for (int i = 0; i < count; i++) {
 		if (strcmp(str, argv[i]) == 0) {
-			return true;
+			return i + 1;
 		}
 	}
-	return false;
+	return -1;
 }
 
 
