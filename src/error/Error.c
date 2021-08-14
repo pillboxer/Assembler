@@ -33,6 +33,12 @@ void error_string_for_code(int code, char **str) {
 		case UNKNOWN_COMMAND:
 			*str = "Unrecognized command";
 			break;
+		case MALFORMED_DESTINATION:
+			*str = "Invalid destination received";
+			break;
+		case MISSING_COMPUTATION:
+			*str = "Received a missing computation";
+			break;
 		default:
 			*str = "Unknown error.";
 		break;
