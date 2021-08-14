@@ -10,8 +10,25 @@
 #define VALID_COMPUTATION_COUNT 28
 #define VALID_JUMP_COUNT 7
 #define WORD_LENGTH 16
-#define DESTINATION_BIT_LENGTH 3
-#define COMPUTATION_BIT_LENGTH 6
+
+#define A_START 0
+
+#define C_A_OR_M_START 3
+#define C_A_OR_M_BIT_LENGTH 1
+
+#define C_DEFAULTS_START 0
+#define C_DEFAULTS_BIT_LENGTH 3
+#define C_DEFAULTS_ADDRESS 7
+
+#define C_COMP_START 4
+#define C_COMP_BIT_LENGTH 6
+
+#define C_JUMP_START 13
+#define C_JUMP_BIT_LENGTH 3
+
+#define C_DEST_BIT_LENGTH 3
+#define C_DEST_START 10
+
 
 // ********************************* //
 
@@ -25,28 +42,21 @@ const int valid_computation_integers[VALID_COMPUTATION_COUNT] = { 42, 63, 58, 12
 																	51, 31, 55, 14, 50, 2, 19,
 																	7, 0, 21, 48, 49, 51, 
 																	55, 50, 2, 19, 7, 0, 21 }; 
-const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JGE", "JEQ", "JLT", "JLE", "JMP", "JNE" };
+const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP" };
 
-// A Commands
 static bool is_a_command(const char* str);
 
-// C Commands
-// remove this, just parse. Exit within parse if something goes wrong
-static bool is_c_command(const char* str);
+// ********************************* //
 
 static int get_destination_address(const char* str, int assigment_operator_position);
 static int destination_address(const char* str);
-
 static int get_computation_address(const char* str);
-
 static int jump_address(const char* str);
 static int get_address(const char* str, const char** argv, unsigned int count);
-
-// Parsed
-static const char* parsed_command(char *cmd, HashMap* hash_map);
-static const char* parsed_a_command(const char* cmd, HashMap* hash_map);
-static const char* parsed_c_command(const char* cmd);
-static const char* to_bin(int address, int number_of_places);
+static void parse_command(char* dst, const char *cmd, HashMap* hash_map);
+static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map);
+static void parse_c_command(char* dst, const char* cmd);
+static void to_bin(char* dst, int address, int number_of_places, int starting_position);
 
 // ********************************* //
 
@@ -59,7 +69,18 @@ void parse(char* dst, char* src, HashMap* hash_map) {
 	for (int i = 0; i <= strlen(src); i++) {
 		if (src[i] == '\n' || src[i] == '\0') {
 			current_label[current_label_position] = '\0';
-			const char* parsed = parsed_command(current_label, hash_map);
+			char parsed[WORD_LENGTH + 1];
+				for (int i = 0; i <= WORD_LENGTH; i++) {
+		if (i == WORD_LENGTH) {
+			parsed[i] = '\0';
+		}
+		else {
+			parsed[i] = '0';
+		}
+	}
+
+
+			parse_command(parsed, current_label, hash_map);
 			for (int j = 0; j < strlen(parsed); j++) {
 				dst[dest_position++] = parsed[j];	
 			}
@@ -72,24 +93,17 @@ void parse(char* dst, char* src, HashMap* hash_map) {
 	dst[dest_position] = '\0';
 }
 
-static const char* parsed_command(char *cmd, HashMap* hash_map) {
+static void parse_command(char* dst, const char *cmd, HashMap* hash_map) {
 	if (is_a_command(cmd)) {
-		return parsed_a_command(cmd, hash_map);
-	}
-	else if (is_c_command(cmd)) {
-		return "Parse C";
+		parse_a_command(dst, cmd, hash_map);
 	}
 	else {
-		exit_with_error(UNKNOWN_COMMAND);
+		parse_c_command(dst, cmd);
 	}
 }
-
-const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
+static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 	size_t cmd_length = strlen(cmd);
 	char lowered[cmd_length];
-
-	// No need for size to consider null terminator since we disregard '@'
-	memset(lowered, 0, cmd_length*sizeof(char));
 	int index = 0;
 
 	// Disregard '@' and 'R'
@@ -104,13 +118,13 @@ const char* parsed_a_command(const char* cmd, HashMap* hash_map) {
 
 	if (strlen(remaining) != 0) {
 		int value = hash_map_get(hash_map, remaining);
-		return to_bin(value, WORD_LENGTH);
+		to_bin(dst, value, WORD_LENGTH, A_START);
 	}
 	else {
 		char address_string[cmd_length];
 		strncpy(address_string, lowered, cmd_length);
 		int address = atoi(address_string);
-		return to_bin(address, WORD_LENGTH);
+		to_bin(dst, address, WORD_LENGTH, A_START);
 	}	
 }
 
@@ -120,7 +134,7 @@ static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
-static int get_positions(const char* cmd, int* assignment, int* computation, int *termination) {
+static void get_positions(const char* cmd, int* assignment, int* computation, int *termination, int* jump) {
 	size_t length = strlen(cmd);
 	for (int i = 0; i < length; i++) {
 			if (cmd[i] == '=') {
@@ -128,7 +142,7 @@ static int get_positions(const char* cmd, int* assignment, int* computation, int
 				*computation = i+1;
 			}
 			if (cmd[i] == ';') {
-				//jump_operation_position = i+1;
+				*jump = i+1;
 				*termination = i;
 			}
 		}
@@ -140,7 +154,6 @@ static int get_positions(const char* cmd, int* assignment, int* computation, int
 static int get_destination_address(const char* cmd, int assignment_operation_position) {
 	char destination[assignment_operation_position + 1];
 	strncpy(destination, cmd, assignment_operation_position);
-	printf("now checking destination %s\n", destination);
 	return destination_address(destination);
 }
 
@@ -151,18 +164,25 @@ static int get_computation_address(const char* cmd) {
 			return valid_computation_integers[i];
 		}
 	}
-
 	return -1;
-
 }
 
-static bool is_c_command(const char* cmd) {
+static int get_jump_address(const char* cmd, int jump_operation_position) {
+	char jump_operation[jump_operation_position + 1];
+	strncpy(jump_operation, cmd, jump_operation_position);
+	return jump_address(jump_operation);
+} 
+
+static void parse_c_command(char* dst, const char* cmd) {
 
 	int assignment_operation_position = 0;
 	int computation_operation_position = 0;
 	int jump_operation_position = 0;
 	int computation_termination_position = 0;
-	get_positions(cmd, &assignment_operation_position, &computation_operation_position, &computation_termination_position);
+
+	to_bin(dst, C_DEFAULTS_ADDRESS, C_DEFAULTS_BIT_LENGTH, C_DEFAULTS_START);
+	printf("After initial %s\n", dst);
+	get_positions(cmd, &assignment_operation_position, &computation_operation_position, &computation_termination_position, &jump_operation_position);
 
 	if (assignment_operation_position != 0) {
 		int address = get_destination_address(cmd, assignment_operation_position);
@@ -170,7 +190,8 @@ static bool is_c_command(const char* cmd) {
 			exit_with_error(MALFORMED_DESTINATION);
 		}
 		else { 
-			printf("Destination address for cmd %s is %s\n", cmd, to_bin(address, DESTINATION_BIT_LENGTH));
+			to_bin(dst, address, C_DEST_BIT_LENGTH, C_DEST_START);
+			printf("After destination %s\n", dst);
 		}
 	}
 
@@ -184,10 +205,11 @@ static bool is_c_command(const char* cmd) {
 		exit_with_error(MISSING_COMPUTATION);
 	}
 	else {
-		printf("Your computation for %s is %s\n", computation_string, to_bin(computation_address, COMPUTATION_BIT_LENGTH));
+		to_bin(dst, computation_address, C_COMP_BIT_LENGTH, C_COMP_START);
+		printf("After computation %s\n", dst);
 	}
 
-//
+//	if (jump_operation_position != 0)
 //	free(computation);
 //
 //	if (jump_operation_position != 0) {
@@ -202,7 +224,6 @@ static bool is_c_command(const char* cmd) {
 //		}
 //		free(jump_operation);
 //	}
-	return true;
 }
 
 
@@ -222,30 +243,16 @@ static int get_address(const char* str, const char** argv, unsigned int count) {
 	return -1;
 }
 
-static const char* to_bin(int address, int number_of_places) {
-	char *binary_address = malloc(number_of_places + 1);
-
-	if (binary_address == NULL)
-		exit_with_error(NULL_POINTER);
-
-	for (int i = 0; i <= number_of_places; i++) {
-		if (i == number_of_places) {
-			binary_address[i] = '\0';
-		}
-		else {
-			binary_address[i] = '0';
-		}
-	}
+static void to_bin(char* cmd, int address, int number_of_places, int starting_position) {
 
 	int quo = address;
-	int rem;
+	int index = number_of_places + starting_position - 1;
 
-	for (int i = 1; i <= number_of_places; i++) {
-		if (quo == 0)
-			break;
+	int rem;
+	printf("STARTING : %d, NO_OF_PACES %d\n", starting_position, number_of_places);
+	for (int i = 0; i < number_of_places; i++) {
 		rem = quo % 2;
-		binary_address[number_of_places - i] = rem == 1 ? '1' : '0';
+		cmd[index--] = rem == 1 ? '1' : '0';
 		quo = quo / 2;
 	}
-	return binary_address;
 }
