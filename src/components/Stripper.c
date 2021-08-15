@@ -45,8 +45,6 @@ void strip_comments(char* dst, const char* src) {
 
 HashMap* strip_labels(char* dst, const char* src) {
 
-	printf("SRC is %s\n", src);
-
 	int current_command = 0;
 	bool save_command = false;
 	bool new_command = true;

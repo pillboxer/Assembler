@@ -36,8 +36,11 @@ void error_string_for_code(int code, char **str) {
 		case MALFORMED_DESTINATION:
 			*str = "Invalid destination received";
 			break;
-		case MISSING_COMPUTATION:
+		case MALFORMED_COMPUTATION:
 			*str = "Received a missing computation";
+			break;
+		case MALFORMED_JUMP:
+			*str = "Invalid jump received";
 			break;
 		default:
 			*str = "Unknown error.";

@@ -66,26 +66,21 @@ void parse(char* dst, char* src, HashMap* hash_map) {
 	char current_label[256];
 	int current_label_position = 0;
 	int dest_position = 0;
+
 	for (int i = 0; i <= strlen(src); i++) {
 		if (src[i] == '\n' || src[i] == '\0') {
 			current_label[current_label_position] = '\0';
 			char parsed[WORD_LENGTH + 1];
-				for (int i = 0; i <= WORD_LENGTH; i++) {
-		if (i == WORD_LENGTH) {
-			parsed[i] = '\0';
-		}
-		else {
-			parsed[i] = '0';
-		}
-	}
-
+			to_bin(parsed, 0, WORD_LENGTH, 0);
+			parsed[WORD_LENGTH] = '\0';
 
 			parse_command(parsed, current_label, hash_map);
 			for (int j = 0; j < strlen(parsed); j++) {
 				dst[dest_position++] = parsed[j];	
 			}
+
 			current_label_position = 0;
-			dst[dest_position++] = '\n';
+			dst[dest_position++] = src[i];
 			continue;
 		}
 			current_label[current_label_position++] = src[i];
@@ -107,12 +102,11 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 	int index = 0;
 
 	// Disregard '@' and 'R'
-	for (size_t i = 1; i < cmd_length; i++) {
+	for (size_t i = 1; i <= cmd_length; i++) {
 		if (i == 0 || (i == 1 && tolower(cmd[i]) == 'r'))
 			continue;
 		lowered[index++] = tolower(cmd[i]);
 	}
-
 	char *remaining;
 	strtol(lowered, &remaining, 10);
 
@@ -127,8 +121,6 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 		to_bin(dst, address, WORD_LENGTH, A_START);
 	}	
 }
-
-
 
 static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
@@ -154,6 +146,7 @@ static void get_positions(const char* cmd, int* assignment, int* computation, in
 static int get_destination_address(const char* cmd, int assignment_operation_position) {
 	char destination[assignment_operation_position + 1];
 	strncpy(destination, cmd, assignment_operation_position);
+	destination[assignment_operation_position] = '\0';
 	return destination_address(destination);
 }
 
@@ -168,8 +161,10 @@ static int get_computation_address(const char* cmd) {
 }
 
 static int get_jump_address(const char* cmd, int jump_operation_position) {
-	char jump_operation[jump_operation_position + 1];
-	strncpy(jump_operation, cmd, jump_operation_position);
+	int jump_operation_length = strlen(cmd) - jump_operation_position;
+	char jump_operation[jump_operation_length + 1];
+	strncpy(jump_operation, cmd+jump_operation_position, jump_operation_length);
+	jump_operation[jump_operation_length] = '\0';
 	return jump_address(jump_operation);
 } 
 
@@ -181,7 +176,6 @@ static void parse_c_command(char* dst, const char* cmd) {
 	int computation_termination_position = 0;
 
 	to_bin(dst, C_DEFAULTS_ADDRESS, C_DEFAULTS_BIT_LENGTH, C_DEFAULTS_START);
-	printf("After initial %s\n", dst);
 	get_positions(cmd, &assignment_operation_position, &computation_operation_position, &computation_termination_position, &jump_operation_position);
 
 	if (assignment_operation_position != 0) {
@@ -191,7 +185,6 @@ static void parse_c_command(char* dst, const char* cmd) {
 		}
 		else { 
 			to_bin(dst, address, C_DEST_BIT_LENGTH, C_DEST_START);
-			printf("After destination %s\n", dst);
 		}
 	}
 
@@ -202,28 +195,26 @@ static void parse_c_command(char* dst, const char* cmd) {
 	int computation_address = get_computation_address(computation_string);
 
 	if (computation_address == -1) {
-		exit_with_error(MISSING_COMPUTATION);
+		exit_with_error(MALFORMED_COMPUTATION);
 	}
 	else {
 		to_bin(dst, computation_address, C_COMP_BIT_LENGTH, C_COMP_START);
-		printf("After computation %s\n", dst);
+		for (int i = computation_operation_position; i < computation_termination_position; i++) {
+			if (tolower(cmd[i]) == 'm') {
+				to_bin(dst, 1, C_A_OR_M_BIT_LENGTH, C_A_OR_M_START);
+			}
+		}
 	}
-
-//	if (jump_operation_position != 0)
-//	free(computation);
-//
-//	if (jump_operation_position != 0) {
-//		int jump_operation_length = strlen(cmd) - jump_operation_position;
-//		char *jump_operation = malloc(sizeof(char) * (jump_operation_length + 1));
-//		if (jump_operation == NULL)
-//			exit_with_error(NULL_POINTER);
-//		strncpy(jump_operation, cmd+jump_operation_position, jump_operation_length);
-//		jump_operation[jump_operation_length] = '\0';
-//		if (is_valid_jump(jump_operation)) {
-//			return false;
-//		}
-//		free(jump_operation);
-//	}
+	
+	if (jump_operation_position != 0) {
+		int address = get_jump_address(cmd, jump_operation_position);
+		if (address == -1) {
+			exit_with_error(MALFORMED_JUMP);
+		}
+		else {
+			to_bin(dst, address, C_JUMP_BIT_LENGTH, C_JUMP_START);
+		}
+	}
 }
 
 
@@ -249,7 +240,6 @@ static void to_bin(char* cmd, int address, int number_of_places, int starting_po
 	int index = number_of_places + starting_position - 1;
 
 	int rem;
-	printf("STARTING : %d, NO_OF_PACES %d\n", starting_position, number_of_places);
 	for (int i = 0; i < number_of_places; i++) {
 		rem = quo % 2;
 		cmd[index--] = rem == 1 ? '1' : '0';
