@@ -2,58 +2,91 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include "../error/Error.h"
+#include "HashMap.h"
+void strip_spaces (char* dst, const char* src) {
 
-static void strip_whitespace(char **ptr);
-static void strip_comments(char **ptr);
+	bool have_reached_printable_char = false;
+	int count = 0;
+	int length = strlen(src);
 
-void strip(char** ptr) {
-	strip_whitespace(ptr);
-	strip_comments(ptr);
+ 	while(*src != '\0') {
+		if (count == length - 1 && *src == '\n')
+			break;
+		have_reached_printable_char = have_reached_printable_char ? true : isprint(*src);
+    	if(have_reached_printable_char && (*src == '\n' || !isspace(*src))) {
+			*dst = *src; // then copy
+      		dst++;
+		}
+		count++;
+		src++;
+	}
+
+  	*dst = '\0';
 }
 
+void strip_comments(char* dst, const char* src) {
 
-static void strip_whitespace(char **ptr) {
-	
-	char *res = malloc(sizeof(*ptr));
-	int current_pos = 0;
-
-	for (int i = 0; i < strlen(*ptr); i++) {
-		if (((*ptr)[i] == ' ') || ((*ptr)[i] == '\n' && ((*ptr)[i-1] == '\n' || (*ptr)[i+1] == '\0'))) {
-			continue;
+	bool copy = true;
+	for (int i = 0; i < strlen(src); i++) {
+		if (src[i] == '\n')
+			copy = true;
+		if (src[i] == '/' && src[i+1] == '/')
+			copy = false;
+		if (copy) {
+			*dst = src[i];
+			dst++;
 		}
-		res[current_pos] = (*ptr)[i];
-		current_pos++; 
+	
 	}
-	res[current_pos] = '\0';
-	*ptr = res;
+	*dst = '\0';
 }
 
-static void strip_comments(char **ptr) {
-	char *res = malloc(sizeof(*ptr));
-	int current_pos = 0;
-	bool copy_allowed = true; 	
-	bool is_purely_comment = false;
+HashMap* strip_labels(char* dst, const char* src) {
 
-	for (int i = 0; i < strlen(*ptr); i++) {
-
-		if ((*ptr)[i] == '\n' && !copy_allowed) { 
-			copy_allowed = true;
-			if (is_purely_comment)
-				continue;
+	int current_command = 0;
+	bool save_command = false;
+	bool new_command = true;
+	bool copy = true;
+	char current_label[256];
+	int current_label_index = 0;
+	char last_copied;
+	HashMap* hash_map = hash_map_create();
+	while(*src != '\0') {
+		if (*src == '\n') {
+			new_command = true;
+			if (last_copied == '\n') {
+				src++;
+			}
+			current_command++;
+			copy = true;
 		}
-
-		if ((*ptr)[i] == '/' && (*ptr)[i+1] == '/') {
-			is_purely_comment = (*ptr)[i-1] == '\n' || i == 0;
-			copy_allowed = false;
-			continue;
+		if (*src == ')' && save_command) {	
+			save_command = false;
+			current_label[current_label_index] = '\0';
+			current_command--;
+			for (int i = 0; i <= strlen(current_label); i++) {
+				char lowered = tolower(current_label[i]);
+				current_label[i] = lowered;
+			}
+			hash_map_put(hash_map, current_label, current_command+1);
+			current_label_index = 0;
 		}
-
-		if (copy_allowed) {
-			res[current_pos] = (*ptr)[i];
-			current_pos++;
+		if (save_command) {
+			current_label[current_label_index++] = *src;
 		}
+		if (new_command && *src == '(') {
+			save_command = true;
+			copy = false;
+		}		
+		if (copy) {
+			*dst = *src;
+			dst++;
+			last_copied = *src;
+		}
+		src++;
 	}
-	
-	res[current_pos] = '\0';
-	*ptr = res;
+		*dst = '\0';
+		return hash_map;
 }

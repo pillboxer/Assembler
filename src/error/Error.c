@@ -27,6 +27,21 @@ void error_string_for_code(int code, char **str) {
 		case FILE_NOT_FOUND:
 			*str = "The file doesn't exist";
 			break;
+		case NULL_POINTER:
+			*str = "Null pointer found";
+			break; 
+		case UNKNOWN_COMMAND:
+			*str = "Unrecognized command";
+			break;
+		case MALFORMED_DESTINATION:
+			*str = "Invalid destination received";
+			break;
+		case MALFORMED_COMPUTATION:
+			*str = "Received a missing computation";
+			break;
+		case MALFORMED_JUMP:
+			*str = "Invalid jump received";
+			break;
 		default:
 			*str = "Unknown error.";
 		break;
