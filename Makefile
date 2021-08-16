@@ -5,6 +5,9 @@ error_dir = src/error/
 COMPILER = gcc
 FLAGS = -Wall -g
 
+tests_max : FLAGS += -DMAX
+tests_max: tests
+
 tests: tests.o libs.o components.o error.o
 	$(COMPILER) $(FLAGS) -o tests *.o
 
