@@ -25,20 +25,29 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 		const char* file_source;
 		const char* file_stripped;
 		const char* file_parsed;
-
+		char file_name[5];
 		#ifdef MAX
+			strcpy(file_name, "MAX");
 			file_source = MAX_ASM_SRC;
 			file_stripped = MAX_ASM_STRIPPED;
 			file_parsed = MAX_ASM_PARSED;
+		#elif RECT
+			strcpy(file_name, "RECT");
+			file_source = RECT_ASM_SRC;
+			file_stripped = RECT_ASM_STRIPPED;
+			file_parsed = RECT_ASM_PARSED;
 		#else
+			strcpy(file_name, "ADD");	
 			file_source = ADD_ASM_SRC;
 			file_stripped = ADD_ASM_STRIPPED;
 			file_parsed = ADD_ASM_PARSED;
 		#endif
+		
+		printf("Testing file %s\n", file_name);
 
-		printf("source is %s\n", file_source);			
 		char no_comments[strlen(file_source) + 1];
 		char parsed[strlen(file_parsed) + 1];
+		printf("Parsed is %s\n", parsed);
 		char no_whitespace[strlen(file_stripped) + 1];
 		char no_labels[strlen(file_stripped + 1)];
 		char src[strlen(file_source) + 1];

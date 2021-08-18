@@ -33,7 +33,7 @@
 // ********************************* //
 
 // Constants
-const char* valid_destinations[VALID_DESTINATION_COUNT] = { "M", "D", "MD" "A", "AM", "AD", "AMD" };
+const char* valid_destinations[VALID_DESTINATION_COUNT] = { "M", "D", "MD", "A", "AM", "AD", "AMD" };
 const char* valid_computations[VALID_COMPUTATION_COUNT] = { "0", "1", "-1", "D", "A", "!D", "!A", "-D", 
 															"-A", "D+1", "A+1", "D-1", "A-1", "D+A", "D-A", 
 															"A-D", "D&A", "D|A", "M", "!M", "-M", "M+1", 
