@@ -43,8 +43,8 @@ void strip_comments(char* dst, const char* src) {
 	*dst = '\0';
 }
 
-HashMap* strip_labels(char* dst, const char* src) {
-
+void strip_labels(char* dst, const char* src, HashMap* hash_map) {
+	
 	int current_command = 0;
 	bool save_command = false;
 	bool new_command = true;
@@ -52,7 +52,7 @@ HashMap* strip_labels(char* dst, const char* src) {
 	char current_label[256];
 	int current_label_index = 0;
 	char last_copied;
-	HashMap* hash_map = hash_map_create();
+
 	while(*src != '\0') {
 		if (*src == '\n') {
 			new_command = true;
@@ -62,6 +62,7 @@ HashMap* strip_labels(char* dst, const char* src) {
 			current_command++;
 			copy = true;
 		}
+
 		if (*src == ')' && save_command) {	
 			save_command = false;
 			current_label[current_label_index] = '\0';
@@ -88,5 +89,10 @@ HashMap* strip_labels(char* dst, const char* src) {
 		src++;
 	}
 		*dst = '\0';
-		return hash_map;
+}
+
+void save_variables(char* dst, HashMap* hash_map) {
+	// Go through the A Instructions
+	// Once we've made it through the command, check if we've already saved it
+	// Otherwise build up from 16.
 }

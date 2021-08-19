@@ -47,15 +47,17 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
 		char no_comments[strlen(file_source) + 1];
 		char parsed[strlen(file_parsed) + 1];
-		printf("Parsed is %s\n", parsed);
 		char no_whitespace[strlen(file_stripped) + 1];
 		char no_labels[strlen(file_stripped + 1)];
 		char src[strlen(file_source) + 1];
+
 		strcpy(src, file_source);
 		strip_comments(no_comments, src);
 		strip_spaces(no_whitespace, no_comments);
-		HashMap* hash_map = strip_labels(no_labels, no_whitespace);
+		HashMap* hash_map = hash_map_create();
+		 strip_labels(no_labels, no_whitespace, hash_map);
 		parse(parsed, no_labels, hash_map);
+		printf("Your result:\n%s\n", parsed);
 		CuAssertStrEquals(tc, (char*)file_parsed, parsed);
 	}
 
