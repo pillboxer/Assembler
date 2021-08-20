@@ -62,6 +62,10 @@ void hash_map_put(HashMap* hash_map, char* key, int value) {
 	}
 }
 
+bool hash_map_contains(HashMap* hash_map, char* key) {
+	return hash_map_get(hash_map, key) != -1;
+}
+
 /** Returns the value to which the specified key is mapped, or -1 if this map contains no mapping for the key */
 int hash_map_get(HashMap* hash_map, char* key) {
   	int hashed_key = hashed(key);

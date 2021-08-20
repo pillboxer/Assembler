@@ -92,6 +92,47 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 }
 
 void save_variables(char* dst, HashMap* hash_map) {
+	bool is_a_variable_declaration = false;
+	char current_variable[256];
+	int current_variable_index = 0;
+
+	while(*dst != '\0') {
+		if (*dst == '\n') {
+			if (is_a_variable_declaration) {
+				is_a_variable_declaration = false;
+				current_variable[current_variable_index] = '\0';
+				char* remaining;
+				long int address = strtol(current_variable, &remaining, 10);
+				printf("Long int is %ld\n", address);
+				if (address == 0) {
+				if (hash_map_contains(hash_map, current_variable)) {
+						printf("Should ignore saving %s\n", current_variable);
+					}
+					else {
+						printf("Must save variable %s\n", current_variable);
+					}
+				}
+				else {
+					printf("It's just a number\n");
+				}
+				current_variable_index = 0;
+			}
+		}
+		if (is_a_variable_declaration) {
+			current_variable[current_variable_index++] = tolower(*dst);
+		}
+		if (*dst == '@') {
+			char next = tolower(*(++dst));
+			printf("Next is %c\n", next);
+			if (next != 'r' && next != '0') {
+				is_a_variable_declaration = true;
+			}
+			dst--;
+		}
+		dst++;
+	}
+	printf("DST is now null\n");
+
 	// Go through the A Instructions
 	// Once we've made it through the command, check if we've already saved it
 	// Otherwise build up from 16.
