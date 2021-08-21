@@ -111,7 +111,6 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 	strtol(lowered, &remaining, 10);
 
 	if (strlen(remaining) != 0) {
-		printf("reaminging is %s\n", remaining);
 		int value = hash_map_get(hash_map, remaining);
 		to_bin(dst, value, WORD_LENGTH, A_START);
 	}

@@ -5,7 +5,7 @@ error_dir = src/error/
 COMPILER = gcc
 FLAGS = -Wall -g
 
-tests_basic: tests
+tests_add: tests
 
 tests_max: FLAGS += -DMAX
 tests_max: tests

@@ -5,6 +5,15 @@
 #include <ctype.h>
 #include "../error/Error.h"
 #include "HashMap.h"
+
+#define SCREEN_ADDRESS 16384
+#define KBD_ADDRESS 24576
+#define SP_ADDRESS 0
+#define LCL_ADDRESS 1
+#define ARG_ADDRESS 2
+#define THIS_ADDRESS 3
+#define THAT_ADDRESS 4
+
 void strip_spaces (char* dst, const char* src) {
 
 	bool have_reached_printable_char = false;
@@ -44,7 +53,15 @@ void strip_comments(char* dst, const char* src) {
 }
 
 void strip_labels(char* dst, const char* src, HashMap* hash_map) {
-	
+
+	hash_map_put(hash_map, "screen", SCREEN_ADDRESS);
+	hash_map_put(hash_map, "kbd", KBD_ADDRESS);
+	hash_map_put(hash_map, "sp", SP_ADDRESS);
+	hash_map_put(hash_map, "lcl", LCL_ADDRESS);
+	hash_map_put(hash_map, "arg", ARG_ADDRESS);
+	hash_map_put(hash_map, "this", THIS_ADDRESS);
+	hash_map_put(hash_map, "that", THAT_ADDRESS);
+
 	int current_command = 0;
 	bool save_command = false;
 	bool new_command = true;
@@ -95,27 +112,29 @@ void save_variables(char* dst, HashMap* hash_map) {
 	bool is_a_variable_declaration = false;
 	char current_variable[256];
 	int current_variable_index = 0;
+	int current_variable_address = 16;
 
 	while(*dst != '\0') {
+
 		if (*dst == '\n') {
 			if (is_a_variable_declaration) {
 				is_a_variable_declaration = false;
 				current_variable[current_variable_index] = '\0';
+
 				char* remaining;
 				long int address = strtol(current_variable, &remaining, 10);
-				printf("Long int is %ld\n", address);
+				current_variable_index = 0;
+
 				if (address == 0) {
-				if (hash_map_contains(hash_map, current_variable)) {
-						printf("Should ignore saving %s\n", current_variable);
+
+					if (hash_map_contains(hash_map, current_variable)) {
+						// It's a label declaration that we've already saved
+						continue;
 					}
 					else {
-						printf("Must save variable %s\n", current_variable);
+						hash_map_put(hash_map, current_variable, current_variable_address++);
 					}
 				}
-				else {
-					printf("It's just a number\n");
-				}
-				current_variable_index = 0;
 			}
 		}
 		if (is_a_variable_declaration) {
@@ -123,7 +142,6 @@ void save_variables(char* dst, HashMap* hash_map) {
 		}
 		if (*dst == '@') {
 			char next = tolower(*(++dst));
-			printf("Next is %c\n", next);
 			if (next != 'r' && next != '0') {
 				is_a_variable_declaration = true;
 			}
@@ -131,9 +149,4 @@ void save_variables(char* dst, HashMap* hash_map) {
 		}
 		dst++;
 	}
-	printf("DST is now null\n");
-
-	// Go through the A Instructions
-	// Once we've made it through the command, check if we've already saved it
-	// Otherwise build up from 16.
 }
