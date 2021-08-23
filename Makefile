@@ -36,5 +36,5 @@ components.o: $(components_dir)/*
 error.o: $(error_dir)/*
 	$(COMPILER) $(FLAGS) -c $(error_dir)*.c -o error.o
 clean:
-	rm tests
 	rm -f *.o
+	rm -f *.out
