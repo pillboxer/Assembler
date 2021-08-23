@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
-#include "../error/Error.h"
 #include "HashMap.h"
 
 #define SCREEN_ADDRESS 16384

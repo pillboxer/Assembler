@@ -1,4 +1,3 @@
-#include "HashMap.h"
 typedef enum command_type {
 	ADD,
 	COMP,

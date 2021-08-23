@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "Files.h"
 #include "../../libs/CuTest.h"
-#include "../../src/components/Stripper.h"
+#include "../components/Stripper.h"
 
 void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 

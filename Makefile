@@ -5,6 +5,12 @@ error_dir = src/error/
 COMPILER = gcc
 FLAGS = -Wall -g
 
+assembler: assembler.o components.o libs.o  error.o
+	$(COMPILER) $(FLAGS) -o assembler *.o
+
+assembler.o: src/assembler.c
+	$(COMPILER) $(FLAGS) -c src/assembler.c -o assembler.o
+
 tests_add: tests
 
 tests_max: FLAGS += -DMAX

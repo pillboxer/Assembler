@@ -27,6 +27,9 @@ void error_string_for_code(int code, char **str) {
 		case FILE_NOT_FOUND:
 			*str = "The file doesn't exist";
 			break;
+		case FILE_READ_ERROR:
+			*str = "Could not read file";
+			break;
 		case NULL_POINTER:
 			*str = "Null pointer found";
 			break; 
@@ -41,6 +44,9 @@ void error_string_for_code(int code, char **str) {
 			break;
 		case MALFORMED_JUMP:
 			*str = "Invalid jump received";
+			break;
+		case FILE_TOO_LARGE:
+			*str = "File too large, please ensure it is less than 500kb";
 			break;
 		default:
 			*str = "Unknown error.";

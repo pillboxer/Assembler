@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Parser.h"
 #include <ctype.h>
+#include "HashMap.h"
 #include "../error/Error.h"
 
 #define VALID_DESTINATION_COUNT 7
