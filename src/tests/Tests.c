@@ -5,7 +5,6 @@
 #include "Files.h"
 #include "../../libs/CuTest.h"
 #include "../components/Stripper.h"
-
 void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
 void TestProgramIsParsedCorrectly(CuTest *tc);

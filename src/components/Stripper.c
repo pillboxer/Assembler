@@ -61,6 +61,14 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 	hash_map_put(hash_map, "this", THIS_ADDRESS);
 	hash_map_put(hash_map, "that", THAT_ADDRESS);
 
+	for (int i = 0; i < 16; i++) {
+		int length = i < 10 ? 2 : 3;
+		char reg[length + 1];
+		reg[0] = 'r';
+		sprintf(reg + 1, "%d", i);
+		hash_map_put(hash_map, reg, i);
+	}
+
 	int current_command = 0;
 	bool save_command = false;
 	bool new_command = true;

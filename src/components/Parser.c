@@ -103,13 +103,10 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 
 	// Disregard '@' and 'R'
 	for (size_t i = 1; i <= cmd_length; i++) {
-		if (i == 0 || (i == 1 && tolower(cmd[i]) == 'r'))
-			continue;
 		lowered[index++] = tolower(cmd[i]);
 	}
 	char* remaining;
 	strtol(lowered, &remaining, 10);
-
 	if (strlen(remaining) != 0) {
 		int value = hash_map_get(hash_map, remaining);
 		to_bin(dst, value, WORD_LENGTH, A_START);

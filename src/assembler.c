@@ -7,14 +7,17 @@
 
 #define MAX_ASSEMBLED_SIZE 1048576
 
-void assemble(const char *file);
+void assemble(const char *file, char *output_name);
 
 int main(int argc, char** argv) {
 	
 	switch (argc) 
 	{
 		case 2:
-			assemble(argv[1]);
+			assemble(argv[1], NULL);
+			break;
+		case 3:
+			assemble(argv[1], argv[2]);
 			break;
 		default:
 			exit_with_error(INCORRECT_ARGUMENT_COUNT);		
@@ -22,7 +25,7 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-void assemble(const char *file_name) {
+void assemble(const char *file_name, char *output_name) {
 	HashMap* hash_map = hash_map_create();
 	long size_in_bytes;
 	char* file_to_assemble;
@@ -53,9 +56,17 @@ void assemble(const char *file_name) {
 			strip_labels(no_labels, no_spaces, hash_map);
 			save_variables(no_labels, hash_map);
 			parse(parsed, no_labels, hash_map);
-			FILE *output = fopen("a.out", "w");
+			char output_file_name[256];
+			if (output_name != NULL) {
+				strcpy(output_file_name, output_name);
+			}
+			else {
+				strcpy(output_file_name, "assembled.hack");
+			}
+			FILE *output = fopen(output_file_name, "w");
 			fwrite(parsed, 1, strlen(parsed), output);
 			fclose(file);
+			printf("Assembly complete");
 		}
 		else {
 			exit_with_error(FILE_READ_ERROR);

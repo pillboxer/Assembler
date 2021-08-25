@@ -7,6 +7,7 @@ FLAGS = -Wall -g
 
 assembler: assembler.o components.o libs.o  error.o
 	$(COMPILER) $(FLAGS) -o assembler *.o
+	rm -f *.o
 
 assembler.o: src/assembler.c
 	$(COMPILER) $(FLAGS) -c src/assembler.c -o assembler.o
