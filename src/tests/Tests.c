@@ -5,6 +5,8 @@
 #include "Files.h"
 #include "../../libs/CuTest.h"
 #include "../components/Stripper.h"
+#include "../components/Parser.h"
+
 void TestStringWithCommentsAndNewLinesIsStripped(CuTest *tc);
 
 void TestProgramIsParsedCorrectly(CuTest *tc);
@@ -35,6 +37,11 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 			file_source = RECT_ASM_SRC;
 			file_stripped = RECT_ASM_STRIPPED;
 			file_parsed = RECT_ASM_PARSED;
+		#elif PONG
+			strcpy(file_name, "PONG");
+			file_source = PONG_ASM_SRC;
+			file_stripped = PONG_ASM_STRIPPED;
+			file_parsed = PONG_ASM_PARSED;
 		#else
 			strcpy(file_name, "ADD");	
 			file_source = ADD_ASM_SRC;
@@ -57,7 +64,6 @@ void TestStringContainingLabelsWithCommentsAndNewLinesIsStripped(CuTest *tc);
 		strip_labels(no_labels, no_whitespace, hash_map);
 		save_variables(no_labels, hash_map);
 		parse(parsed, no_labels, hash_map);
-		printf("Your result:\n%s\n", parsed);
 		CuAssertStrEquals(tc, (char*)file_parsed, parsed);
 	}
 

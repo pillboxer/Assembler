@@ -20,7 +20,10 @@ tests_max: tests
 tests_rect: FLAGS += -DRECT
 tests_rect: tests
 
-tests: tests.o libs.o components.o error.o
+tests_pong: FLAGS += -DPONG
+tests_pong: tests
+
+tests: tests.o components.o libs.o error.o
 	$(COMPILER) $(FLAGS) -o tests *.o
 
 tests.o: $(tests_dir)/*
@@ -39,3 +42,4 @@ error.o: $(error_dir)/*
 clean:
 	rm -f *.o
 	rm -f *.out
+	ls -p | grep -v -E '(/|Makefile)' | xargs rm
