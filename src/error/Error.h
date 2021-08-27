@@ -5,5 +5,7 @@
 #define MALFORMED_DESTINATION 1005
 #define MALFORMED_COMPUTATION 1006
 #define MALFORMED_JUMP 1007
+#define FILE_READ_ERROR 1008
+#define FILE_TOO_LARGE 1009
 
 void exit_with_error(int code);
