@@ -5,5 +5,5 @@ typedef enum command_type {
 	UNKNOWN
 } command_type_t;
 
-int num_commands(const char *str);
+// Parse a source file that has been stripped of comments and spaces
 void parse(char* dst, char* src, HashMap* hash_map);

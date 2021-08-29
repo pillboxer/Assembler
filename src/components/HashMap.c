@@ -14,7 +14,7 @@ static int hashed(char* arg) {
 }
 
 // Inspect all nodes in a given bucket of the HashMap
-void print_list(Node* head, int bucket) {
+static void print_list(Node* head, int bucket) {
 	printf("BUCKET: %d\n\n", bucket);
 	while(head != NULL) {
 		printf("\t%s\t:\t%d\n", head->key, head->value);
@@ -23,7 +23,6 @@ void print_list(Node* head, int bucket) {
 	printf("\n**************\n\n");
 }
 
-// Creates and returns a HashMap (caller to free)
 HashMap* hash_map_create() {
     HashMap *hash_map = malloc(sizeof(HashMap));
 	for (int i = 0; i < NUM_BUCKETS; i++)
@@ -31,7 +30,6 @@ HashMap* hash_map_create() {
 	return hash_map;
 }
 
-// Assumes value will always be non-negative
 void hash_map_put(HashMap* hash_map, char* key, int value) {
 	int hashed_key = hashed(key);
 	int result = hash_map_get(hash_map, key);
@@ -73,7 +71,6 @@ bool hash_map_contains(HashMap* hash_map, char* key) {
 	return hash_map_get(hash_map, key) != -1;
 }
 
-// Returns the value for the key or -1 if it doesn't exist
 int hash_map_get(HashMap* hash_map, char* key) {
 
   	int hashed_key = hashed(key);
@@ -91,7 +88,6 @@ int hash_map_get(HashMap* hash_map, char* key) {
 	
 }
 
-// Removes the value mapping for the key
 void hash_map_remove(HashMap* hash_map, char* key) {
 	int hashed_key = hashed(key);
 	if (hash_map_get(hash_map, key) != -1) {
@@ -114,7 +110,6 @@ void hash_map_remove(HashMap* hash_map, char* key) {
 		}
 	}
 }
-
 // Free HashMap
 void hash_map_free(HashMap* hash_map) {
     free(hash_map);
