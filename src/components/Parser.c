@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "HashMap.h"
+#include "Parser.h"
 #include "../error/Error.h"
 
 #define VALID_DESTINATION_COUNT 7
@@ -167,12 +168,8 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 	for (size_t i = 1; i <= cmd_length; i++) {
 		lowered[index++] = tolower(cmd[i]);
 	}
-	char* remaining;
-	strtol(lowered, &remaining, 10);
-	***** THIS IS BROKEN FOR INSTRUCTIONS THAT START WITH A NUMBER *****
-	if (strlen(remaining) != 0) {
+	if (!is_integral_string(lowered)) {
 		printf("Lowered is %s\n", lowered);
-		printf("remaining is %s\n", remaining);
 		int value = hash_map_get(hash_map, lowered);
 		to_bin(dst, value, WORD_LENGTH, A_START);
 	}
@@ -239,6 +236,16 @@ static int jump_address(const char* str) {
 
 static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
+}
+
+bool is_integral_string(char *str) {
+	size_t length = strlen(str);
+	for (int i = 0; i < length; i++) {
+		if (!isdigit(str[i])) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // Retrieve positions of assignment, computation, 

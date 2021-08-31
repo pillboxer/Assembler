@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "HashMap.h"
+#include "Parser.h"
 
 #define SCREEN_ADDRESS 16384
 #define KBD_ADDRESS 24576
@@ -127,13 +128,9 @@ void save_variables(char* dst, HashMap* hash_map) {
 			if (is_a_variable_declaration) {
 				is_a_variable_declaration = false;
 				current_variable[current_variable_index] = '\0';
-
-				char* remaining;
-				long int address = strtol(current_variable, &remaining, 10);
 				current_variable_index = 0;
 
-				if (address == 0) {
-
+				if (!is_integral_string(current_variable)) {
 					if (hash_map_contains(hash_map, current_variable)) {
 						// It's a label declaration that we've already saved
 						continue;
