@@ -263,21 +263,20 @@ bool is_integral_string(char *str) {
 // and jump instructions as well as the point of termination of a computation
 static void get_positions(const char* cmd, int* assignment, int* computation, int *termination, int* jump) {
 
-
 	size_t length = strlen(cmd);
 	for (int i = 0; i < length; i++) {
-			if (cmd[i] == '=') {
-				*assignment = i;
-				*computation = i+1;
-			}
-			if (cmd[i] == ';') {
-				*jump = i+1;
-				*termination = i;
-			}
+		if (cmd[i] == '=') {
+			*assignment = i;
+			*computation = i+1;
 		}
-		if (*termination == 0) {
-			*termination = length;
+		if (cmd[i] == ';') {
+			*jump = i+1;
+			*termination = i;
 		}
+	}
+	if (*termination == 0) {
+		*termination = length;
+	}
 }
 
 // Convert an address to binary padding with number of places, 
