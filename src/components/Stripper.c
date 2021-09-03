@@ -14,6 +14,7 @@
 #define THIS_ADDRESS 3
 #define THAT_ADDRESS 4
 
+// Removes extraneous white space and blank lines
 void strip_spaces (char* dst, const char* src) {
 
 	bool have_reached_printable_char = false;
@@ -35,9 +36,11 @@ void strip_spaces (char* dst, const char* src) {
   	*dst = '\0';
 }
 
+// Remove comments (like this!) from file
 void strip_comments(char* dst, const char* src) {
 
 	bool copy = true;
+
 	for (int i = 0; i < strlen(src); i++) {
 		if (src[i] == '\n')
 			copy = true;
@@ -47,13 +50,13 @@ void strip_comments(char* dst, const char* src) {
 			*dst = src[i];
 			dst++;
 		}
-	
 	}
 	*dst = '\0';
 }
 
-void strip_labels(char* dst, const char* src, HashMap* hash_map) {
-
+// Map particular variables to corresponding address
+static void map_reserved_variables(HashMap* hash_map) {
+	
 	hash_map_put(hash_map, "screen", SCREEN_ADDRESS);
 	hash_map_put(hash_map, "kbd", KBD_ADDRESS);
 	hash_map_put(hash_map, "sp", SP_ADDRESS);
@@ -69,6 +72,15 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 		sprintf(reg + 1, "%d", i);
 		hash_map_put(hash_map, reg, i);
 	}
+}
+
+	
+
+// Remove label definitions and replace them with corresponding line number of
+// logic following the definition
+void strip_labels(char* dst, const char* src, HashMap* hash_map) {
+
+	map_reserved_variables(hash_map);
 
 	int current_command = 0;
 	bool save_command = false;
@@ -91,11 +103,13 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 		if (*src == ')' && save_command) {	
 			save_command = false;
 			current_label[current_label_index] = '\0';
+			// Move backwards to go back to the command we were dealing with
 			current_command--;
 			for (int i = 0; i <= strlen(current_label); i++) {
 				char lowered = tolower(current_label[i]);
 				current_label[i] = lowered;
 			}
+			// Now move forward one line and save whatever command number that is
 			hash_map_put(hash_map, current_label, current_command+1);
 			current_label_index = 0;
 		}
@@ -116,6 +130,7 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 		*dst = '\0';
 }
 
+// Save any user declared variables
 void save_variables(char* dst, HashMap* hash_map) {
 	bool is_a_variable_declaration = false;
 	char current_variable[256];
@@ -132,7 +147,7 @@ void save_variables(char* dst, HashMap* hash_map) {
 
 				if (!is_integral_string(current_variable)) {
 					if (hash_map_contains(hash_map, current_variable)) {
-						// It's a label declaration that we've already saved
+						// It's a label declaration that we've already saved in the method above
 						continue;
 					}
 					else {

@@ -46,6 +46,7 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map);
 static void to_bin(char* cmd, int address, int number_of_places, int starting_position); 
 static void get_positions(const char* cmd, int* assignment, int* computation, int *termination, int* jump); 
 
+
 // *********** CONSTANTS ************** //
 
 // Allowed destinations in C instruction
@@ -64,8 +65,10 @@ const int valid_computation_integers[VALID_COMPUTATION_COUNT] = { 42, 63, 58, 12
 // Allowed jump commands in C instruction
 const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP" };
 
+
 // *********** PARSING ************** //
 
+// Parse a source asm file that has been stripped of whitespace and comments
 void parse(char* dst, char* src, HashMap* hash_map) {
 
 	char current_label[256];
@@ -98,6 +101,7 @@ void parse(char* dst, char* src, HashMap* hash_map) {
 }
 
 static void parse_command(char* dst, const char *cmd, HashMap* hash_map) {
+
 	// Can either be A command ("@command") or C command ("D=D+1;JGE")
 	if (is_a_command(cmd)) {
 		parse_a_command(dst, cmd, hash_map);
@@ -160,6 +164,7 @@ static void parse_c_command(char* dst, const char* cmd) {
 }
 
 static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
+
 	size_t cmd_length = strlen(cmd);
 	char lowered[cmd_length];
 	int index = 0;
@@ -169,17 +174,19 @@ static void parse_a_command(char* dst, const char* cmd, HashMap* hash_map) {
 		lowered[index++] = tolower(cmd[i]);
 	}
 	if (!is_integral_string(lowered)) {
-		printf("Lowered is %s\n", lowered);
+		// It's a user-declared variable
 		int value = hash_map_get(hash_map, lowered);
 		to_bin(dst, value, WORD_LENGTH, A_START);
 	}
 	else {
+		// It's a direct address (eg '@42')
 		char address_string[cmd_length];
 		strncpy(address_string, lowered, cmd_length);
 		int address = atoi(address_string);
 		to_bin(dst, address, WORD_LENGTH, A_START);
 	}	
 }
+
 
 // *********** ADDRESSES ************** //
 
@@ -192,22 +199,22 @@ static int get_address(const char* str, const char** argv, unsigned int count) {
 		}
 	}
 	return -1;
-
 }
 
+// Retrieve destination address from C instruction
 static int get_destination_address(const char* cmd, int assignment_operation_position) {
 
 	char destination[assignment_operation_position + 1];
 	strncpy(destination, cmd, assignment_operation_position);
 	destination[assignment_operation_position] = '\0';
 	return destination_address(destination);
-
 }
 
 static int destination_address(const char* str) {
 	return get_address(str, valid_destinations, VALID_DESTINATION_COUNT);
 }
 
+// Retrieve computation address from C instruction
 static int get_computation_address(const char* cmd) {
 
 	for (int i = 0; i < VALID_COMPUTATION_COUNT; i++) {
@@ -218,6 +225,7 @@ static int get_computation_address(const char* cmd) {
 	return -1;
 }
 
+// Retrieve jump address from C instruction
 static int get_jump_address(const char* cmd, int jump_operation_position) {
 
 	int jump_operation_length = strlen(cmd) - jump_operation_position;
@@ -232,13 +240,16 @@ static int jump_address(const char* str) {
    return get_address(str, valid_jumps, VALID_JUMP_COUNT);
 }
 
+
 // *********** HELPER ************** //
 
 static bool is_a_command(const char* str) {
 	return str[0] == '@' && strlen(str) > 1;
 }
 
+// Is the command pure integers?
 bool is_integral_string(char *str) {
+
 	size_t length = strlen(str);
 	for (int i = 0; i < length; i++) {
 		if (!isdigit(str[i])) {
@@ -251,6 +262,8 @@ bool is_integral_string(char *str) {
 // Retrieve positions of assignment, computation, 
 // and jump instructions as well as the point of termination of a computation
 static void get_positions(const char* cmd, int* assignment, int* computation, int *termination, int* jump) {
+
+
 	size_t length = strlen(cmd);
 	for (int i = 0; i < length; i++) {
 			if (cmd[i] == '=') {
