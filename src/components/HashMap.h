@@ -12,7 +12,6 @@ typedef struct {
 } HashMap;
 
 HashMap* hash_map_create();
-
 void hash_map_put(HashMap *hash_map, char *key, int value);
 void hash_map_remove(HashMap *hash_map, char *key);
 int hash_map_get(HashMap *hash_map, char* key);

@@ -3,8 +3,10 @@
 #include <string.h>
 #include "HashMap.h"
 
+// Hashing function, courtesy of
+// http://www.cse.yorku.ca/~oz/hash.html
 static int hashed(char* arg) {
-	// http://www.cse.yorku.ca/~oz/hash.html
+
 	unsigned long hash = 5381;
 	int c;
 	while ((c = *arg++))
@@ -12,15 +14,7 @@ static int hashed(char* arg) {
 	return hash % NUM_BUCKETS;
 }
 
-void print_list(Node* head, int bucket) {
-	printf("BUCKET: %d\n\n", bucket);
-	while(head != NULL) {
-		printf("\t%s\t:\t%d\n", head->key, head->value);
-		head = head->next;
-	}
-	printf("\n**************\n\n");
-}
-
+// Create a HashMap (caller to free) 
 HashMap* hash_map_create() {
     HashMap *hash_map = malloc(sizeof(HashMap));
 	for (int i = 0; i < NUM_BUCKETS; i++)
@@ -28,11 +22,14 @@ HashMap* hash_map_create() {
 	return hash_map;
 }
 
-/** value will always be non-negative. */
+// Insert into HashMap (assumes non-negative value)
 void hash_map_put(HashMap* hash_map, char* key, int value) {
+
 	int hashed_key = hashed(key);
 	int result = hash_map_get(hash_map, key);
+
 	if (result != -1) {
+		// Overwrite old value
 		Node *current = hash_map->buckets[hashed_key];
 		while (current->key != key) {
 			current = current->next;
@@ -41,6 +38,7 @@ void hash_map_put(HashMap* hash_map, char* key, int value) {
 	}
 	else {
 		if (hash_map->buckets[hashed_key] == NULL) {
+			// Insert at first node in bucket
 			hash_map->buckets[hashed_key] = malloc(sizeof(Node));
 			hash_map->buckets[hashed_key]->key =  malloc(sizeof(char) * (strlen(key) + 1));
 			strcpy(hash_map->buckets[hashed_key]->key, key);
@@ -48,6 +46,7 @@ void hash_map_put(HashMap* hash_map, char* key, int value) {
 			hash_map->buckets[hashed_key]->next = NULL;
 		}
 		else {
+			// Collision, traverse to end of linked list
 			Node *current = hash_map->buckets[hashed_key];
 			Node *new = malloc(sizeof(Node));
 			new->key = malloc(sizeof(char) * (strlen(key) + 1));
@@ -66,33 +65,37 @@ bool hash_map_contains(HashMap* hash_map, char* key) {
 	return hash_map_get(hash_map, key) != -1;
 }
 
-/** Returns the value to which the specified key is mapped, or -1 if this map contains no mapping for the key */
+// Retrieve value for key from HashMap
 int hash_map_get(HashMap* hash_map, char* key) {
+
   	int hashed_key = hashed(key);
 	Node *current = hash_map->buckets[hashed_key];
 	int returned = -1;
+
 	while (current != NULL) {
 		if (strcmp(current->key, key) == 0) {
 			returned = current->value;
 			break;
 		}
-	current = current->next;
+		current = current->next;
 	}
 	return returned;
-	
 }
 
-/** Removes the mapping of the specified value key if this map contains a mapping for the key */
+// Remove value for key in HashMap
 void hash_map_remove(HashMap* hash_map, char* key) {
+
 	int hashed_key = hashed(key);
 	if (hash_map_get(hash_map, key) != -1) {
 		Node *current = hash_map->buckets[hashed_key];
 		if (current->key == key) {
+			// Remove from head node
 			Node *new_current = current->next;
 			current = NULL;
 			hash_map->buckets[hashed_key] = new_current;
 		}
 		else {
+			// Traverse and remove when found
 			while (current->next->key != key) {
 				current = current->next;
 			}
@@ -104,6 +107,7 @@ void hash_map_remove(HashMap* hash_map, char* key) {
 	}
 }
 
+// Free HashMap
 void hash_map_free(HashMap* hash_map) {
     free(hash_map);
 }
