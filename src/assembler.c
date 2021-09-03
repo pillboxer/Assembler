@@ -33,9 +33,6 @@ int main(int argc, char** argv) {
 // Assembles a file into binary code
 static void assemble(const char *file_name, char *output_name) {
 
-	// Create a HashMap to store variables and label definitions
-	HashMap* hash_map = hash_map_create();
-
 	long size_in_bytes;
 	char* file_to_assemble;
 	printf("Starting assembly of file %s\n", file_name);
@@ -46,6 +43,10 @@ static void assemble(const char *file_name, char *output_name) {
 		exit_with_error(FILE_NOT_FOUND);
 	}
 	else {
+
+		// Create a HashMap to store variables and label definitions
+		HashMap* hash_map = hash_map_create();
+
 		// Retrieve the size of the file (max 500k)
 		fseek(file, 0, SEEK_END);
 		size_in_bytes = ftell(file);
@@ -89,7 +90,7 @@ static void assemble(const char *file_name, char *output_name) {
 			FILE *output = fopen(output_file_name, "w");
 			fwrite(parsed, 1, strlen(parsed), output);
 			fclose(file);
-
+			hash_map_free(hash_map);
 			printf("Assembly complete");
 		}
 		else {
