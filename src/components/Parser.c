@@ -7,28 +7,28 @@
 #include "Parser.h"
 #include "../error/Error.h"
 
-#define VALID_DESTINATION_COUNT 7
-#define VALID_COMPUTATION_COUNT 28
-#define VALID_JUMP_COUNT 7
-#define WORD_LENGTH 16
+const int VALID_DESTINATION_COUNT = 7;
+const int VALID_COMPUTATION_COUNT = 28;
+const int VALID_JUMP_COUNT = 7;
+const int WORD_LENGTH = 16;
 
-#define A_START 0
+const int A_START = 0;
 
-#define C_A_OR_M_START 3
-#define C_A_OR_M_BIT_LENGTH 1
+const int C_A_OR_M_START = 3;
+const int C_A_OR_M_BIT_LENGTH = 1;
 
-#define C_DEFAULTS_START 0
-#define C_DEFAULTS_BIT_LENGTH 3
-#define C_DEFAULTS_ADDRESS 7
+const int C_DEFAULTS_START = 0;
+const int C_DEFAULTS_BIT_LENGTH = 3;
+const int C_DEFAULTS_ADDRESS = 7;
 
-#define C_COMP_START 4
-#define C_COMP_BIT_LENGTH 6
+const int C_COMP_START = 4;
+const int C_COMP_BIT_LENGTH = 6;
 
-#define C_JUMP_START 13
-#define C_JUMP_BIT_LENGTH 3
+const int C_JUMP_START = 13;
+const int C_JUMP_BIT_LENGTH = 3;
 
-#define C_DEST_BIT_LENGTH 3
-#define C_DEST_START 10
+const int C_DEST_BIT_LENGTH = 3;
+const int C_DEST_START = 10;
 
 // Declarations
 
@@ -69,39 +69,30 @@ const char* valid_jumps[VALID_JUMP_COUNT] = { "JGT", "JEQ", "JGE", "JLT", "JNE",
 // *********** PARSING ************** //
 
 // Parse a source asm file that has been stripped of whitespace and comments
-void parse(char* dst, char* src, HashMap* hash_map) {
+void parse(char* dst, const char* src, HashMap* hash_map) {
+    static char label_buffer[256];
+    char *current_label = label_buffer;
 
-	char current_label[256];
-	int current_label_position = 0;
-	int dest_position = 0;
-
-	for (int i = 0; i <= strlen(src); i++) {
-	
-		if (src[i] == '\n' || src[i] == '\0') {
-			// We've either reached a line break or EOF
-			current_label[current_label_position] = '\0';
-			char parsed[WORD_LENGTH + 1];
-			to_bin(parsed, 0, WORD_LENGTH, 0);
-			parsed[WORD_LENGTH] = '\0';
-			// Parse the current command
-			parse_command(parsed, current_label, hash_map);
-			for (int j = 0; j < strlen(parsed); j++) {
-				// Add the newly parsed command to the output file
-				dst[dest_position++] = parsed[j];	
-			}
-			// Reset label posiion and add \n or \0 to output
-			current_label_position = 0;
-			dst[dest_position++] = src[i];
-			continue;
-		}
-		current_label[current_label_position++] = src[i];
-	}
-	// Done, make sure to end with null terminator
-	dst[dest_position] = '\0';
+    for (bool working = true ; working; ++src) {
+        if (*src == '\n' || *src == '\0') {
+            // We've either reached a line break or EOF
+            *current_label = '\0';
+            // Parse the current command
+            parse_command(dst, label_buffer, hash_map);
+            dst += WORD_LENGTH;
+            // Reset label posiion and add \n or \0 to output
+            current_label = label_buffer;
+            *dst++ = *src;
+            working = *src;
+        } else {
+            *current_label++ = *src;
+        }
+    }
+    // Done, make sure to end with null terminator
+    *dst = '\0';
 }
 
 static void parse_command(char* dst, const char *cmd, HashMap* hash_map) {
-
 	// Can either be A command ("@command") or C command ("D=D+1;JGE")
 	if (is_a_command(cmd)) {
 		parse_a_command(dst, cmd, hash_map);
@@ -134,11 +125,11 @@ static void parse_c_command(char* dst, const char* cmd) {
 		}
 	}
 
-	int computation_string_length = computation_termination_position - computation_operation_position;
+	const int computation_string_length = computation_termination_position - computation_operation_position;
 	char computation_string[computation_string_length + 1];
 	strncpy(computation_string, cmd+computation_operation_position, computation_string_length);
 	computation_string[computation_string_length] = '\0';
-	int computation_address = get_computation_address(computation_string);
+	const int computation_address = get_computation_address(computation_string);
 
 	if (computation_address == -1) {
 		exit_with_error(MALFORMED_COMPUTATION);
@@ -153,7 +144,7 @@ static void parse_c_command(char* dst, const char* cmd) {
 	}
 	
 	if (jump_operation_position != 0) {
-		int address = get_jump_address(cmd, jump_operation_position);
+		const int address = get_jump_address(cmd, jump_operation_position);
 		if (address == -1) {
 			exit_with_error(MALFORMED_JUMP);
 		}

@@ -6,33 +6,30 @@
 #include "HashMap.h"
 #include "Parser.h"
 
-#define SCREEN_ADDRESS 16384
-#define KBD_ADDRESS 24576
-#define SP_ADDRESS 0
-#define LCL_ADDRESS 1
-#define ARG_ADDRESS 2
-#define THIS_ADDRESS 3
-#define THAT_ADDRESS 4
+const int SCREEN_ADDRESS = 16384;
+const int KBD_ADDRESS = 24576;
+const int SP_ADDRESS = 0;
+const int LCL_ADDRESS = 1;
+const int ARG_ADDRESS = 2;
+const int THIS_ADDRESS = 3;
+const int THAT_ADDRESS = 4;
 
 // Removes extraneous white space and blank lines
 void strip_spaces (char* dst, const char* src) {
 
 	bool have_reached_printable_char = false;
-	int count = 0;
-	int length = strlen(src);
+	const int length = strlen(src);
 
- 	while(*src != '\0') {
-		if (count == length - 1 && *src == '\n')
+	for (int count = 0; *src != '\0'; ++count, ++src) {
+		if (count == length - 1 && *src == '\n') {
 			break;
-		have_reached_printable_char = have_reached_printable_char ? true : isprint(*src);
+		}
+		have_reached_printable_char |= isprint(*src); 
     	if(have_reached_printable_char && (*src == '\n' || !isspace(*src))) {
 			*dst = *src; // then copy
       		dst++;
 		}
-		count++;
-		src++;
 	}
-
   	*dst = '\0';
 }
 
@@ -65,12 +62,10 @@ static void map_reserved_variables(HashMap* hash_map) {
 	hash_map_put(hash_map, "this", THIS_ADDRESS);
 	hash_map_put(hash_map, "that", THAT_ADDRESS);
 
-	for (int i = 0; i < 16; i++) {
-		int length = i < 10 ? 2 : 3;
-		char reg[length + 1];
-		reg[0] = 'r';
-		sprintf(reg + 1, "%d", i);
-		hash_map_put(hash_map, reg, i);
+	char reg_name[5];
+	for (int i = 0; i < 16; ++i) {
+		snprintf(reg_name, 5, "r%d", i);
+		hash_map_put(hash_map, reg_name, i);
 	}
 }
 
@@ -90,6 +85,8 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 	int current_label_index = 0;
 	char last_copied;
 
+	printf("DST is %s\n", dst);
+
 	while(*src != '\0') {
 		if (*src == '\n') {
 			new_command = true;
@@ -101,12 +98,14 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 		}
 
 		if (*src == ')' && save_command) {	
+			printf("Blah");
 			save_command = false;
 			current_label[current_label_index] = '\0';
 			// Move backwards to go back to the command we were dealing with
 			current_command--;
 			for (int i = 0; i <= strlen(current_label); i++) {
 				char lowered = tolower(current_label[i]);
+				printf("Index is %d\n", i);
 				current_label[i] = lowered;
 			}
 			// Now move forward one line and save whatever command number that is
@@ -114,6 +113,7 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 			current_label_index = 0;
 		}
 		if (save_command) {
+			printf("Accessing index %d\n", current_label_index + 1);
 			current_label[current_label_index++] = *src;
 		}
 		if (new_command && *src == '(') {
@@ -121,7 +121,9 @@ void strip_labels(char* dst, const char* src, HashMap* hash_map) {
 			copy = false;
 		}		
 		if (copy) {
+			printf("Copyying %c\n", *src);
 			*dst = *src;
+			
 			dst++;
 			last_copied = *src;
 		}

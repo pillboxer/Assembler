@@ -3,7 +3,7 @@ libs_dir = libs/
 components_dir = src/components/
 error_dir = src/error/
 COMPILER = gcc
-FLAGS = -Wall -g
+FLAGS = -Wall -g 
 
 assembler: assembler.o components.o libs.o  error.o
 	$(COMPILER) $(FLAGS) -o assembler *.o
@@ -11,6 +11,9 @@ assembler: assembler.o components.o libs.o  error.o
 
 assembler.o: src/assembler.c
 	$(COMPILER) $(FLAGS) -c src/assembler.c -o assembler.o
+
+memory_check: tests
+memory_check: FLAGS += -fsanitize=address -fno-omit-frame-pointer
 
 tests_add: tests
 

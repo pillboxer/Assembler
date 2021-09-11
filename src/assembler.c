@@ -62,6 +62,7 @@ static void assemble(const char *file_name, char *output_name) {
 			
 			// Read the contents of the file into the buffer
 			fread(file_to_assemble, 1, size_in_bytes, file);
+			file_to_assemble[size_in_bytes] = '\0';
 			char no_comments[size_in_bytes + 1];
 			char no_spaces[size_in_bytes + 1];
 			char no_labels[size_in_bytes + 1];

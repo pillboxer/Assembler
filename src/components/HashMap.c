@@ -92,6 +92,7 @@ void hash_map_remove(HashMap* hash_map, char* key) {
 			// Remove from head node
 			Node *new_current = current->next;
 			current = NULL;
+			free(current);
 			hash_map->buckets[hashed_key] = new_current;
 		}
 		else {
@@ -103,12 +104,22 @@ void hash_map_remove(HashMap* hash_map, char* key) {
 			Node *new_next = current->next->next;
 			current->next = new_next;
 			old_next = NULL;
+			free(old_next);
 		}
 	}
 }
 
 // Free HashMap
 void hash_map_free(HashMap* hash_map) {
+    if (hash_map) {
+        for (int i = 0; i < NUM_BUCKETS; ++i) {
+            for (Node* curr = hash_map->buckets[i]; curr; ) {
+                Node* victim = curr;
+                curr = curr->next;
+                free(victim->key);
+                free(victim);
+            }
+        }
+    }
     free(hash_map);
 }
-

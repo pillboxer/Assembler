@@ -50,7 +50,7 @@ void TestProgramIsParsedCorrectly(CuTest *tc) {
 	char no_comments[strlen(file_source) + 1];
 	char parsed[strlen(file_parsed) + 1];
 	char no_whitespace[strlen(file_stripped) + 1];
-	char no_labels[strlen(file_stripped + 1)];
+	char no_labels[strlen(file_stripped + 10000)];
 	char src[strlen(file_source) + 1];
 
 	strcpy(src, file_source);

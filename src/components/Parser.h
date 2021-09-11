@@ -5,5 +5,5 @@ typedef enum command_type {
 	UNKNOWN
 } command_type_t;
 
-void parse(char* dst, char* src, HashMap* hash_map);
+void parse(char* dst, const char* src, HashMap* hash_map);
 bool is_integral_string(char* str);
